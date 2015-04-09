@@ -1,0 +1,36 @@
+#Hide the following filesfrom the world
+<FilesMatch "\.(htaccess|htpasswd|ini|php|git|svn|log|sh|sql|sqlite|cache)$">
+	Order Allow,Deny
+	Deny from all
+</FilesMatch>
+
+#Allow the index.php file
+<filesMatch "index\.php$">
+	Allow from all
+</filesMatch>
+
+# Disable directory browsing
+Options All -Indexes
+
+# Prevent folder listing
+#IndexIgnore *
+
+# Set Default page
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+
+	# Switch on the rewrite rules engine
+	RewriteEngine on
+	#RewriteBase		/~wayne/
+	# Hide svn and git folders/files
+	RedirectMatch 404 /\\.(svn|git)
+    
+	# If the file/dir does not exist, route everything to index.php
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_URI} !^/(robots\.txt|favicon\.ico)
+
+	RewriteRule ^(.*)$ index.php?url=$1 [PT,L]
+
+</IfModule>

@@ -1,0 +1,8 @@
+.DS_Store
+*.log
+.project
+uploads/*
+stats/
+/error/
+logs/
+app/config/config.inc.php
