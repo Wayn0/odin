@@ -1,0 +1,62 @@
+<?php
+/**
+ * config.inc.php
+ *
+ * This is the configuration file for the odin web application framework
+ *
+ * @package     Odin Framework
+ * @author      Wayne Oliver <wayne@open-is.co.za>
+ * @copyright   Wayne Oliver <wayne@open-is.co.za> 2014 - 2015
+ * @license     BSD
+ ********************************** 80 Columns *********************************
+ **/
+
+// Application Name
+define('APP_NAME','%APPNAME%');
+define('CUSTOMER_NAME','%APPNAME%');
+define('EMAIL_FROM','%EMAIL_FROM%');
+
+// Default Routing
+define('DEFAULT_MODULE', 'home');
+define('DEFAULT_ACTION', 'index');
+
+// Environment type
+define('DEVELOPMENT_ENVIRONMENT', true);
+
+// Default time zone
+date_default_timezone_set('Africa/Johannesburg');
+
+// Logging Verbosity 
+// FATAL = 1,
+// ERROR = 2,
+// WARN  = 3,
+// INFO  = 4,
+// DEBUG = 5
+// QUERY = 6 
+// NONE  = 0
+// Always set to debug when DEVELOPMENT_ENVIRONMENT is true
+define('LOG_LEVEL', 6); 			
+
+// Database Credentials
+define('DB_REQUIRED',true);         // DB connection required?
+define('DB_TYPE','%DBTYPE%');       // DB PDO type: mysql / sqlite / pgsql
+define('DB_HOST','%DBHOST%');       // hostname / ip of DB server
+define('DB_PORT','%DBPORT%');       // Database server port		
+define('DB_USER','%DBUSER%');       // Username
+define('DB_PASS','%DBPASS%');       // Password
+define('DB_NAME','%DBNAME%');       // Database name
+
+// Memcached
+define('USE_MEMCACHED',  %USE_MEMCACHED%);
+define('MEMCACHED_HOST', %MEMCACHED_HOST%);
+define('MEMCACHED_PORT', %MEMCACHED_PORT%);
+
+// Password Complexity
+define('MIN_PASSWORD_LENGTH',%PASSWORDLENGTH%);
+define('MIXED_CASE',1);
+define('ALPHA_NUM',1);
+
+// Upload Directory (does not need to be under the webroot, better if its not)
+define('UPLOAD_DIR', ROOT . DS . 'static' . DS . 'images' . DS);
+
+//********************************* 80 Columns *********************************
