@@ -15,7 +15,7 @@ Options All -Indexes
 # Prevent folder listing
 #IndexIgnore *
 
-# Set Default page
+# Set Deafault page
 DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
@@ -32,5 +32,6 @@ DirectoryIndex index.php
 	RewriteCond %{REQUEST_URI} !^/(robots\.txt|favicon\.ico)
 
 	RewriteRule ^(.*)$ index.php?url=$1 [PT,L]
+
 
 </IfModule>

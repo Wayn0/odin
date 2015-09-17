@@ -6,3 +6,4 @@ stats/
 /error/
 logs/
 app/config/config.inc.php
+static/images/20*
