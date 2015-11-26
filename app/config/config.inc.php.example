@@ -6,7 +6,7 @@
  *
  * @package     Odin Framework
  * @author      Wayne Oliver <wayne@open-is.co.za>
- * @copyright   Wayne Oliver <wayne@open-is.co.za> 2014 - 2015
+ * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2015
  * @license     BSD
  ********************************** 80 Columns *********************************
  **/
@@ -55,6 +55,9 @@ define('MEMCACHED_PORT', %MEMCACHED_PORT%);
 define('MIN_PASSWORD_LENGTH',%PASSWORDLENGTH%);
 define('MIXED_CASE',1);
 define('ALPHA_NUM',1);
+
+// Session no activity timeout in mins
+define('SESSION_TIMEOUT',5);
 
 // Upload Directory (does not need to be under the webroot, better if its not)
 define('UPLOAD_DIR', ROOT . DS . 'static' . DS . 'images' . DS);
