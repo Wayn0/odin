@@ -8,6 +8,8 @@
  * @license     BSD
  ********************************** 80 Columns *********************************
  **/
+
+use Base32\Base32;
   
 class OTP {
   // This class is heavily inspired by and in some case copid verbatim from

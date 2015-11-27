@@ -58,6 +58,7 @@ define('ALPHA_NUM',1);
 
 // Session no activity timeout in mins
 define('SESSION_TIMEOUT',5);
+define('BASE32_SECRET','KNXW2ZKTORZGS3THJFJWK5A=');
 
 // Upload Directory (does not need to be under the webroot, better if its not)
 define('UPLOAD_DIR', ROOT . DS . 'static' . DS . 'images' . DS);
