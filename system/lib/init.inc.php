@@ -22,9 +22,10 @@ spl_autoload_register(function ($class_name)  {
   }
 });
 
-// composer bits
-require_once(ROOT . DS . 'vendor'. DS .'autoload.php');
-
+// Composer auto loading
+if (file_exists(ROOT . DS . 'vendor'. DS .'autoload.php')) {
+  require_once(ROOT . DS . 'vendor'. DS .'autoload.php');
+} 
 
 // Configure the app for prod/dev
 if (DEVELOPMENT_ENVIRONMENT == true) {
