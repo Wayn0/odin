@@ -5,7 +5,7 @@ vendor/
 .project
 uploads/*
 stats/
-/error/
+error/
 logs/
 app/config/config.inc.php
 static/images/20*

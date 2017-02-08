@@ -31,7 +31,7 @@ DirectoryIndex index.php
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteCond %{REQUEST_URI} !^/(robots\.txt|favicon\.ico)
 
-	RewriteRule ^(.*)$ index.php?url=$1 [PT,L]
+	RewriteRule ^(.*)$ index.php?url=$1 [PT,L,QSA]
 
 
 </IfModule>

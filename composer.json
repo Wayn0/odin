@@ -1,2 +1,5 @@
 {
+	"require": {
+		"wayne-oliver/log": "^0.0.1"
+	}
 }

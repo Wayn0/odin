@@ -7,9 +7,9 @@
  *
  * @package     Odin Framework
  * @author      Wayne Oliver <wayne@open-is.co.za>
- * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2015
- * @license     BSD
- ********************************** 80 Columns *********************************
+ * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2017
+ * @license     http://www.opensource.org/licenses/BSD-2-Clause
+ *
  **/
 
 // Autoload classes from the LIB dir
@@ -24,20 +24,34 @@ spl_autoload_register(function ($class_name)  {
 
 // Composer auto loading
 if (file_exists(ROOT . DS . 'vendor'. DS .'autoload.php')) {
-  require_once(ROOT . DS . 'vendor'. DS .'autoload.php');
+  require_once ROOT . DS . 'vendor'. DS .'autoload.php';
 } 
 
 // Configure the app for prod/dev
 if (DEVELOPMENT_ENVIRONMENT == true) {
   error_reporting(E_ALL);
   ini_set('display_errors','On');
-  $log = new Log(LOG_DIR,Log::QUERY);
+  $log = new Log\Log(LOG_DIR,Log\Log::QUERY);
 }
 else {
   error_reporting(E_ALL);
   ini_set('display_errors','Off');
-  $log = new Log(LOG_DIR,LOG_LEVEL);
+  $log = new Log\Log(LOG_DIR,LOG_LEVEL);
 }
+
+// Log user out if session expired.
+// Below creating the log to log the event
+if (isset($_SESSION[APP_NAME]['LAST_ACTIVITY']) 
+     && (time() - $_SESSION[APP_NAME]['LAST_ACTIVITY'] > 60 * SESSION_TIMEOUT)) {
+  ($_SESSION[APP_NAME]['EMAIL']) ? $email = $_SESSION[APP_NAME]['EMAIL'] : $email ="";
+  $log->log_info("User session timeout, destroying session for user: $email");
+  session_unset();     // unset $_SESSION variable for the run-time 
+  session_destroy();   // destroy session data in storage
+  header('Location: ' . BASE_URL . $url); // back to login page
+}
+// Update LAST_ACTIVITY
+$_SESSION[APP_NAME]['LAST_ACTIVITY'] = time();
+
 
 // Connect to the database
 // Only load the DB connection if required
@@ -75,6 +89,42 @@ if (DB_REQUIRED == true) {
   }
 }
 
+//Parameters for passing to custom classes
+$params        = array();
+$params['db']  = $db;
+$params['log'] = $log;
+
+// Twig for rendering
+$loader = new Twig_Loader_Filesystem(TEMPLATE_DIR);
+if (DEVELOPMENT_ENVIRONMENT == true) {
+  $twig = new Twig_Environment($loader, array(
+    'debug' => true,
+  ));
+  $twig->addExtension(new Twig_Extension_Debug());  
+} else {
+  $twig = new Twig_Environment($loader, array(
+    'cache' => CACHE_DIR,
+  ));  
+}
+
+$template_vars = array(
+  'title'      => APP_NAME,
+  'base_url'   => BASE_URL,
+  'static_url' => STAT_URL,
+  'css_url'    => CSS_URL,
+  'js_url'     => JS_URL,
+  'img_url'    => IMG_URL,
+  'images_url' => IMAGES_URL,  
+  'asset_url'  => ASSET_URL,
+  'ico_url'    => ICO_URL,
+  'add_css'    => '',
+  'add_js'     => '',
+);
+
+// Make request headers available to modules
+$request_headers = apache_request_headers();
+
+
 // Begin Routing section
 // Expand the url into an array for easy manipulation
 $url_array = array();
@@ -104,11 +154,6 @@ else {
   $query_string = $url_array;
 }
 
-// Load application specific init file before including the modules
-if (file_exists(APPLIB_DIR . 'app-init.inc.php')) {
-  require_once(APPLIB_DIR . 'app-init.inc.php');
-}
-
 // Check the module that's being called and that it exists
 if (!file_exists(MOD_DIR . strtolower($module))) {
   $log->log_error("Invalid module: $module action: $action");
@@ -124,7 +169,36 @@ elseif(!file_exists(MOD_DIR . strtolower($module) . DS . strtolower($action) . '
   $query_string[0] = 404;
 }
 
-// Call the requested page an log the call
-$log->log_debug("Calling: $module/$action with variables: " . implode(",", $query_string));
-require_once(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php');
+// DEBUG INFORMATION
+$request_method  = $_SERVER['REQUEST_METHOD'];
+$request_time    = time() - $_SERVER['REQUEST_TIME'];
+$method_string   = '_' . $request_method;
+$request_details = "";
 
+if($request_method == "GET" || $request_method == "POST") {
+
+	$method_array    = $$method_string;
+	if (array_key_exists("password",$method_array))
+	  $method_array["password"]= "**************";
+	if (array_key_exists("password1",$method_array))
+	  $method_array["password1"]= "**************";
+	if (array_key_exists("password2",$method_array))
+	  $method_array["password2"]= "**************";
+	$request_details = print_r($method_array,true);
+}
+
+// Display any uploads if passed
+if(isset($_FILES) && !empty($_FILES))
+  $files = "Files: " . print_r($_FILES,true);
+else
+  $files = "";
+
+// Call the requested page an log the call
+$log->log_debug("$request_method - $request_time - $url: $request_details $files");
+
+
+// Load application specific init file before including the modules
+if (file_exists(APPLIB_DIR . 'app-init.inc.php')) {
+  require_once(APPLIB_DIR . 'app-init.inc.php');
+}  
+require_once(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php');
