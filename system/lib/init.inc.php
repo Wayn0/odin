@@ -13,41 +13,41 @@
  **/
 
 // Autoload classes from the LIB dir
-spl_autoload_register(function ($class_name)  {
-  if (file_exists(LIB_DIR . DS . $class_name . '.class.php')) {
-    require_once(LIB_DIR . DS . $class_name . '.class.php');
-  }
-  if (file_exists(APPLIB_DIR . DS . $class_name . '.class.php')) {
-    require_once(APPLIB_DIR . DS . $class_name . '.class.php');
-  }
+spl_autoload_register(function ($class_name) {
+	if (file_exists(LIB_DIR . DS . $class_name . '.class.php')) {
+		require_once(LIB_DIR . DS . $class_name . '.class.php');
+	}
+	if (file_exists(APPLIB_DIR . DS . $class_name . '.class.php')) {
+		require_once(APPLIB_DIR . DS . $class_name . '.class.php');
+	}
 });
 
 // Composer auto loading
 if (file_exists(ROOT . DS . 'vendor'. DS .'autoload.php')) {
-  require_once ROOT . DS . 'vendor'. DS .'autoload.php';
+	require_once ROOT . DS . 'vendor'. DS .'autoload.php';
 } 
 
 // Configure the app for prod/dev
 if (DEVELOPMENT_ENVIRONMENT == true) {
-  error_reporting(E_ALL);
-  ini_set('display_errors','On');
-  $log = new Log\Log(LOG_DIR,Log\Log::QUERY);
+	error_reporting(E_ALL);
+	ini_set('display_errors','On');
+	$log = new Log\Log(LOG_DIR,Log\Log::QUERY);
 }
 else {
-  error_reporting(E_ALL);
-  ini_set('display_errors','Off');
-  $log = new Log\Log(LOG_DIR,LOG_LEVEL);
+	error_reporting(E_ALL);
+	ini_set('display_errors','Off');
+	$log = new Log\Log(LOG_DIR,LOG_LEVEL);
 }
 
 // Log user out if session expired.
 // Below creating the log to log the event
 if (isset($_SESSION[APP_NAME]['LAST_ACTIVITY']) 
      && (time() - $_SESSION[APP_NAME]['LAST_ACTIVITY'] > 60 * SESSION_TIMEOUT)) {
-  ($_SESSION[APP_NAME]['EMAIL']) ? $email = $_SESSION[APP_NAME]['EMAIL'] : $email ="";
-  $log->log_info("User session timeout, destroying session for user: $email");
-  session_unset();     // unset $_SESSION variable for the run-time 
-  session_destroy();   // destroy session data in storage
-  header('Location: ' . BASE_URL . $url); // back to login page
+	($_SESSION[APP_NAME]['EMAIL']) ? $email = $_SESSION[APP_NAME]['EMAIL'] : $email ="";
+	$log->logInfo("User session timeout, destroying session for user: $email");
+	session_unset();     // unset $_SESSION variable for the run-time 
+	session_destroy();   // destroy session data in storage
+	header('Location: ' . BASE_URL . $url); // back to login page
 }
 // Update LAST_ACTIVITY
 $_SESSION[APP_NAME]['LAST_ACTIVITY'] = time();
@@ -56,37 +56,35 @@ $_SESSION[APP_NAME]['LAST_ACTIVITY'] = time();
 // Connect to the database
 // Only load the DB connection if required
 if (DB_REQUIRED == true) {
-  // Attempt to connect to the defined data
-  try
-  {
-    switch (DB_TYPE) {
-      case 'mysql':
-        $mysql_dsn = 'mysql:dbname=' . DB_NAME .';host=' . DB_HOST . ';port=' . DB_PORT;
-        $db = new PDO($mysql_dsn, DB_USER, DB_PASS);
-        break;
+	// Attempt to connect to the defined data
+	try {
+	switch (DB_TYPE) {
+		case 'mysql':
+			$mysql_dsn = 'mysql:dbname=' . DB_NAME .';host=' . DB_HOST . ';port=' . DB_PORT;
+			$db = new PDO($mysql_dsn, DB_USER, DB_PASS);
+			break;
 
-      case 'sqlite':
-        $sqlite_dsn = 'sqlite:' . LOG_DIR . DS . DB_NAME . '.sqlite' ;
-        $db = new PDO($sqlite_dsn);
-        break;
+		case 'sqlite':
+			$sqlite_dsn = 'sqlite:' . LOG_DIR . DS . DB_NAME . '.sqlite' ;
+			$db = new PDO($sqlite_dsn);
+			break;
 
-      case 'pgsql':
-        $pgsql_dsn = 'pgsql:host='.DB_HOST.';dbname='.DB_NAME.';user='.DB_USER.';password='.DB_PASS.';';
-        $db = new PDO($pgsql_dsn );
-        break;
+		case 'pgsql':
+			$pgsql_dsn = 'pgsql:host='.DB_HOST.';dbname='.DB_NAME.';user='.DB_USER.';password='.DB_PASS.';';
+			$db = new PDO($pgsql_dsn );
+			break;
 
-      default:
-        throw new Exception("Invalid database type: " . DB_TYPE);
-    }
+		default:
+			throw new Exception("Invalid database type: " . DB_TYPE);
+		}
 
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  }
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	}
 
-  catch (PDOException $e)
-  {
-    $log->log_fatal("Database connection error: check config.inc.php and that database is configured and running");
-    die('<strong>Could not connect to the database: </strong><p>Please check that your configured database server is running...</p>');
-  }
+	catch (PDOException $e) {
+		$log->logFatal("Database connection error: check config.inc.php and that database is configured and running");
+		die('<strong>Could not connect to the database: </strong><p>Please check that your configured database server is running...</p>');
+	}
 }
 
 //Parameters for passing to custom classes
@@ -97,28 +95,24 @@ $params['log'] = $log;
 // Twig for rendering
 $loader = new Twig_Loader_Filesystem(TEMPLATE_DIR);
 if (DEVELOPMENT_ENVIRONMENT == true) {
-  $twig = new Twig_Environment($loader, array(
-    'debug' => true,
-  ));
-  $twig->addExtension(new Twig_Extension_Debug());  
+	$twig = new Twig_Environment($loader, array('debug' => true));
+	$twig->addExtension(new Twig_Extension_Debug());  
 } else {
-  $twig = new Twig_Environment($loader, array(
-    'cache' => CACHE_DIR,
-  ));  
+	$twig = new Twig_Environment($loader, array('cache' => CACHE_DIR,));  
 }
 
 $template_vars = array(
-  'title'      => APP_NAME,
-  'base_url'   => BASE_URL,
-  'static_url' => STAT_URL,
-  'css_url'    => CSS_URL,
-  'js_url'     => JS_URL,
-  'img_url'    => IMG_URL,
-  'images_url' => IMAGES_URL,  
-  'asset_url'  => ASSET_URL,
-  'ico_url'    => ICO_URL,
-  'add_css'    => '',
-  'add_js'     => '',
+	'title'      => APP_NAME,
+	'base_url'   => BASE_URL,
+	'static_url' => STAT_URL,
+	'css_url'    => CSS_URL,
+	'js_url'     => JS_URL,
+	'img_url'    => IMG_URL,
+	'images_url' => IMAGES_URL,  
+	'asset_url'  => ASSET_URL,
+	'ico_url'    => ICO_URL,
+	'add_css'    => '',
+	'add_js'     => '',
 );
 
 // Make request headers available to modules
@@ -133,40 +127,40 @@ $url_array = explode("/",$url);
 // Split the various parts of the url into there module/action/get-variables
 $module = $url_array[0];
 if ($module == '') {
-  // If no module has been specified then use default home
-  $module = DEFAULT_MODULE;
-  $action = DEFAULT_ACTION;
-  $query_string = array();
+	// If no module has been specified then use default home
+	$module = DEFAULT_MODULE;
+	$action = DEFAULT_ACTION;
+	$query_string = array();
 }
 else {
-  //Check if an action has been specified, if not assign the default action
-  array_shift($url_array);
-  if (sizeof($url_array) == 0) {
-    $action = DEFAULT_ACTION;
-  }
-  else {
-    $action = $url_array[0];
-    if ($action == '')
-      $action = DEFAULT_ACTION;
-  }
+	//Check if an action has been specified, if not assign the default action
+	array_shift($url_array);
+	if (sizeof($url_array) == 0) {
+		$action = DEFAULT_ACTION;
+	}
+	else {
+		$action = $url_array[0];
+		if ($action == '')
+			$action = DEFAULT_ACTION;
+	}
 
-  array_shift($url_array);
-  $query_string = $url_array;
+	array_shift($url_array);
+	$query_string = $url_array;
 }
 
 // Check the module that's being called and that it exists
 if (!file_exists(MOD_DIR . strtolower($module))) {
-  $log->log_error("Invalid module: $module action: $action");
-  $module          = 'error';
-  $action          = 'index';
-  $query_string[0] = 404;
+	$log->logError("Invalid module: $module action: $action");
+	$module          = 'error';
+	$action          = 'index';
+	$query_string[0] = 404;
 }
 // Check the action exists if the default is not specified
 elseif(!file_exists(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php')) {
-  $log->log_error("Invalid module: $module action: $action");
-  $module          = 'error';
-  $action          = 'index';
-  $query_string[0] = 404;
+	$log->logError("Invalid module: $module action: $action");
+	$module          = 'error';
+	$action          = 'index';
+	$query_string[0] = 404;
 }
 
 // DEBUG INFORMATION
@@ -189,16 +183,15 @@ if($request_method == "GET" || $request_method == "POST") {
 
 // Display any uploads if passed
 if(isset($_FILES) && !empty($_FILES))
-  $files = "Files: " . print_r($_FILES,true);
+	$files = "Files: " . print_r($_FILES,true);
 else
-  $files = "";
+	$files = "";
 
 // Call the requested page an log the call
-$log->log_debug("$request_method - $request_time - $url: $request_details $files");
-
+$log->logDebug("$request_method - $request_time - $url: $request_details $files");
 
 // Load application specific init file before including the modules
 if (file_exists(APPLIB_DIR . 'app-init.inc.php')) {
-  require_once(APPLIB_DIR . 'app-init.inc.php');
+	require_once(APPLIB_DIR . 'app-init.inc.php');
 }  
 require_once(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php');

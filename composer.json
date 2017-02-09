@@ -1,5 +1,5 @@
 {
 	"require": {
-		"wayne-oliver/log": "^0.0.1"
+		"wayne-oliver/log": "~0.1.0"
 	}
 }

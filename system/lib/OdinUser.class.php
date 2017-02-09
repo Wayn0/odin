@@ -112,25 +112,31 @@ class OdinUser
 
 	/**
 	 * Class constructor
-	 * @param array		Config options, db and log objects
-	 * @param int		User's database id
-	 * @param string	User's unique identifier
+	 * 
+	 * @param array	$params Config options, db and log objects
+	 * @param int $id User's database id
+	 * @param string $slug	User's unique identifier
+	 * @param string $email User's email address
+	 * 
 	 * @return void
 	 **/
-	public function __construct($params = array(), $id = null, $slug = '')
+	public function __construct($params=array(),$id=null,$slug= '',$email='')
 	{
 		// Populate default params like db/log
 		foreach($params as $key => $value) {
 			$this->$key = $value;
 		}
 
-		// Load user details via id or slug
+		// Load user details via id, slug or email
 		if (is_numeric($id)) {
 			$this->id = $id;
 			$this->getDetailsById();			
 		} else if ($id == null && $slug != ''){
 			$this->slug = $slug;
 			$this->getDetailsBySlug();
+		} else if ($id == null && $slug == '' && $email != ''){
+			$this->email = $email;
+			$this->getDetailsByEmail();
 		}
 	}	
 
@@ -156,7 +162,7 @@ class OdinUser
 			$result = $stmt->fetch();
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 		}
 		// Populate the object
@@ -186,7 +192,7 @@ class OdinUser
 			$result = $stmt->fetch();
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 		}
 		// Populate the object
@@ -216,7 +222,7 @@ class OdinUser
 			$result = $stmt->fetch();
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 		}
 		// Populate the object
@@ -256,7 +262,7 @@ class OdinUser
 	 *
 	 * @return array
 	 */
-	private function get_all()
+	private function getAll()
 	{
 		try {
 			$stmt = $this->db->prepare("SELECT u.id,u.email,ap.name,
@@ -269,7 +275,7 @@ class OdinUser
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return array();
 		}
 	}
@@ -279,7 +285,7 @@ class OdinUser
 	 *
 	 * @return array
 	 */
-	private function get_active()
+	private function getActive()
 	{
 		try {
 			$stmt = $this->db->prepare("SELECT u.id,u.email,ap.name,
@@ -293,7 +299,7 @@ class OdinUser
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return array();
 		}
 	}
@@ -303,7 +309,7 @@ class OdinUser
 	 *
 	 * @return array
 	 */
-	private function get_deleted()
+	private function getDeleted()
 	{
 		try {
 			$stmt = $this->db->prepare("SELECT u.id,u.email,ap.name,
@@ -317,7 +323,7 @@ class OdinUser
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return array();
 		}
 	}	
@@ -329,7 +335,7 @@ class OdinUser
 	 *
 	 * @return array
 	 */
-	public static function get_authentication_providers($params)
+	public static function getAuthenticationProviders($params)
 	{
 		try {
 			$db  = $params['db'];
@@ -344,69 +350,157 @@ class OdinUser
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
 		catch (Exception $e) {
-			$log->log_error($e);
+			$this->log->logError($e);
 			return array();
 		}
 	}		
 
-  
+	/*
+	 * Check if a slug is already in use
+	 *
+	 * @params array $params containing paramns['db'] and params['log']
+	 * @params string $slug Slug you wish to check
+	 *
+	 * @return bool
+	 */	
+	public static function verifySlug($params,$slug)
+	{
+		
+		try {
+			$db  = $params['db'];
+			$log = $params['log'];
+		} catch (Exception $e) {
+			return false;
+		}		
 
+		try {
 
+			$stmt = $this->db>prepare("SELECT id FROM user WHERE slug=:slug"); 
+										   
+			$stmt->bindValue(':slug', $slug);  
+			$stmt->execute();
+			
+			if($result = $stmt->fetch()){
+				return true;
+			} else {
+				return false;
+			}
+		
+		} catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
+		}
+	} 
 
+	/*
+	 * Check if an email address is already registered
+	 *
+	 * @params array $params containing paramns['db'] and params['log']
+	 * @params string $email Email address you wish to check
+	 *
+	 * @return bool
+	 */	
+	public static function verifyEmail($params,$slug)
+	{
+		
+		try {
+			$db  = $params['db'];
+			$log = $params['log'];
+		} catch (Exception $e) {
+			return false;
+		}		
+
+		try {
+
+			$stmt = $this->db>prepare("SELECT id FROM user WHERE email=:email"); 
+										   
+			$stmt->bindValue(':email', $email);  
+			$stmt->execute();
+			
+			if($result = $stmt->fetch()){
+				return true;
+			} else {
+				return false;
+			}
+		
+		} catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
+		}
+	} 
 	
 
-  /**
-   * Verify Username and password
-   * @param username user's email address
-	 * @param string user's supplied password
-   * @return bool 
-   **/ 		
-	function verify_password($email, $password)
+
+	/**
+	 * Verify email/username and password combination
+	 * 
+	 * @param string $email User's email address
+	 * @param string $password User's password
+	 * 
+	 * @return bool Do the username and password combination match?
+	 * 
+	 **/
+	public function verifyPassword($email, $password)
 	{
-    try {
-      $stmt = $GLOBALS['db']->prepare("SELECT u.hash,u.salt 
-                                       FROM user u 
-                                       WHERE email=:email
-                                       AND u.authentication_provider_id = 1 
-                                       AND u.deleted=0 
-                                       AND u.enabled=1");
-      $stmt->bindValue(':email', $email);
-      $stmt->execute();
-      $result = $stmt->fetch();
-      if ($result['hash'] == $this->get_hash($password,$result['salt'])) {
-        $this->set_logged_in($email);
-        return TRUE;
-      }
-    }
-    catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
+		try {
+			$stmt = $this->db->prepare("SELECT u.hash,u.salt F
+										FROM user u 
+										WHERE email=:email
+										AND u.authentication_provider_id = 1 
+										AND u.deleted=0");
+										
+			$stmt->bindValue(':email', $email);
+			$stmt->execute();
+			$result = $stmt->fetch();
+			
+			if ($result['hash'] == Util::getHash($password,$result['salt'])) {
+				$this->set_logged_in($email);
+				return true;
+			}
+		}
+		catch (Exception $e) {
+			$this->log->logError($e);
+			return array();
+		}
 	}
+	
+	/**
+	 * Reset the User's password via email
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Succesfully reset or not
+	 * 
+	 **/
+	public function resetPassword()
+	{
+		if (! is_numeric($this->id) {
+			return false;
+		}
+		
+		try {
+			
+			if (defined(MIN_PASSWORD_LENGTH)) {
+				$len = MIN_PASSWORD_LENGTH;
+			} else {
+				$len = 10;
+			}
+			
+			$salt = Util::getSalt();
+			$pass = Util::getRandomString($len);
+			$hash = Util::getHash($pass,$salt);
+			
+			$stmt = $this->db->prepare("UPDATE user 
+										SET salt=:salt, 
+											hash=:hash,change_password=1 
+										WHERE email=:email");
 
-	public static function reset_password($email) {
-    try {
-      $stmt = $GLOBALS['db']->prepare("SELECT id FROM user 
-                                       WHERE email=:email 
-                                       AND authentication_provider_id = 1                                       
-                                       AND enabled=1 
-                                       AND deleted=0");
-      $stmt->bindValue(':email', $email);
-      $stmt->execute();
-      $result = $stmt->fetch();
-      if ($result) {
-        $salt     = User::get_salt();
-        $password = User::random_string(MIN_PASSWORD_LENGTH);
-        $hash     = User::get_hash($password, $salt);
+			$stmt->bindValue(':salt',  $salt);
+			$stmt->bindValue(':hash',  $hash);
+			$stmt->bindValue(':email', $this->email);
+										
+			if ($stmt->execute()) {
 
-        $stmt = $GLOBALS['db']->prepare("UPDATE user 
-                                        SET salt=:salt, hash=:hash, 
-                                          change_password=1
-                                        WHERE email=:email");
-
-        $stmt->bindValue(':salt',  $salt);
-        $stmt->bindValue(':hash',  $hash);
-        $stmt->bindValue(':email', $email);
 
         if ($stmt->execute()) {
           // TODO: Update audit log, send email
@@ -419,7 +513,7 @@ class OdinUser
             $from = 'no-reply@noreply.com';   
             
           if(file_exists($template)) {
-            $GLOBALS['log']->log_debug("USER: Sending html notification to $email, reading template: $template "); 
+            $GLOBALS['log']->logDebug("USER: Sending html notification to $email, reading template: $template "); 
 
             $fh = fopen($template, 'r');
             $html_message = fread($fh, filesize($template));
@@ -460,103 +554,124 @@ For any queries or bug reporting please contact support
             return TRUE;
           }
           else {
-            $GLOBALS['log']->log_error("EMAIL: Could not send password reset email: $email \n". $mail->ErrorInfo);
+            $GLOBALS['log']->logError("EMAIL: Could not send password reset email: $email \n". $mail->ErrorInfo);
             return FALSE;
           }
-        }
-        else {
-          $GLOBALS['log']->log_error("EMAIL: Could not reset password: $email ");
-          return FALSE;
-        }
-      }
-      else {
-        $GLOBALS['log']->log_error("EMAIL: Could not find user email: $email");
-        return FALSE;
-      }
-    }
-    catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-  }
+        }				
+				
 
-	public function set_password($password) {
-    
-		if ($this->id != 0) {
-			$salt = $this->get_salt();
-			$hash = $this->get_hash($password, $salt);
-			
-      try {
-        $stmt = $GLOBALS['db']->prepare("UPDATE user 
-                                         SET salt=:salt, hash=:hash, 
-                                             change_password=0
-                                         WHERE id=:id");
-        $stmt->bindValue(':salt', $salt);
-        $stmt->bindValue(':hash', $hash);
-        $stmt->bindValue(':id',   $this->id);
-        if ($stmt->execute()) {
-          $GLOBALS['log']->log_debug("PASSWORD: User:" . $this->id . " changed his/her password");
-          return TRUE;
-        }
-        else {
-          return FALSE;
-        }
-      }
-      catch (Exception $e) {
-        $GLOBALS['log']->log_error($e);
-        return FALSE;
-      }
+			} else {
+				$this->log->logError("USER: Unable to reset password for user " . $this->email);
+				return false;
+			}
 		}
-		else 
-		{
-			$this->logout;
+		catch (Exception $e) {
+			$this->log->logError($e);
+			return array();
 		}
-	}
+	}	
 
-	function set_last_login()
+	/**
+	 * Set the User's password 
+	 * 
+	 * @param string $password
+	 * 
+	 * @return bool Succesfully set or not
+	 * 
+	 **/
+	public function setPassword($password)
 	{
-		if ($this->id != 0)
-		{
-			$this->last_login = date('Y-m-d H:i:s');
+		// Not a valid user
+		if ($this->id == null)
+			return false;				
+
+		$salt = $this->get_salt();
+		$hash = $this->get_hash($password, $salt);
+
+		try {
+			$stmt = $this->db->prepare("UPDATE user 
+										SET salt=:salt,hash=:hash,change_password=0 
+										WHERE id=:id");
+		
+			$stmt->bindValue(':salt', $salt);
+			$stmt->bindValue(':hash', $hash);
+			$stmt->bindValue(':id',   $this->id);
 			
-      try {
-        $stmt = $GLOBALS['db']->prepare("UPDATE user SET last_login=now() WHERE id=:id");
-        $stmt->bindValue(':id', $this->id);
-        if ($stmt->execute()) {
-          return TRUE;
-        }
-        else {
-          return FALSE;
-        }
-      }
-      catch (Exception $e) {
-        $GLOBALS['log']->log_error($e);
-        return FALSE;
-      }
-		}
-		else 
-		{
-			$this->logout;
+			if ($stmt->execute()) {
+				$this->log->logDebug("PASSWORD: User:" . $this->email . " changed his/her password");
+				return tru;
+			} else {
+				return false;
+			}
+			
+		} catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
 		}
 	}
 
-	public function set_logged_in($email)
+	/**
+	 * Set the User's last_login timestamp
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Succesfully set or not
+	 * 
+	 **/
+	function setLastLogin()
+	{
+		// Not a valid user
+		if ($this->id == null)
+			return false;
+			
+		$this->last_login = date('Y-m-d H:i:s');
+
+		try {
+			$stmt = $GLOBALS['db']->prepare("UPDATE user SET last_login=now() WHERE id=:id");
+			$stmt->bindValue(':id', $this->id);
+				
+			if ($stmt->execute()) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
+		}
+	}
+
+	/**
+	 * Set user as logged in 
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Succesfully set or not
+	 * 
+	 **/
+	public function setLoggedIn()
 	{
 		$_SESSION[APP_NAME]['AUTHENTICATED'] = TRUE;
-		$_SESSION[APP_NAME]['EMAIL'] = $email;
+		$_SESSION[APP_NAME]['EMAIL'] = $this->email;
 
-    try {
-      $this->email = $email;
-      $this->get_details_by_email();
-      return TRUE;
-    } 
-    catch (Exception $e) {
-      $_SESSION[APP_NAME]['AUTHENTICATED'] = FALSE;
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
+		try {
+			$this->getDetailsByEmail();
+			return true;
+		} catch (Exception $e) {
+			$_SESSION[APP_NAME]['AUTHENTICATED'] = FALSE;
+			$this->log->logError($e);;
+			return false;
+		}
 	}
 
+	/**
+	 * Set user as logged out 
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Succesfully set or not
+	 * 
+	 **/
 	function logout()
 	{
 		if(isset($_SESSION[APP_NAME]['AUTHENTICATED'])) {
@@ -568,209 +683,46 @@ For any queries or bug reporting please contact support
 		header('Location: ' . BASE_URL );
 	}
 
-  function is_logged_in($email = '') {
-    if(isset($_SESSION[APP_NAME]['AUTHENTICATED']) 
-          && $_SESSION[APP_NAME]['AUTHENTICATED'] == TRUE 
-          && $_SESSION[APP_NAME]['EMAIL'] == $email) {
+	/**
+	 * Check if the user is logged in
+	 * 
+	 * @param none
+	 * 
+	 * @return bool
+	 * 
+	 **/  
+	function isLoggedIn()
+	{
+		if(isset($_SESSION[APP_NAME]['AUTHENTICATED']) 
+			&& $_SESSION[APP_NAME]['AUTHENTICATED'] == TRUE 
+			&& $_SESSION[APP_NAME]['EMAIL'] == $this->email) {
 
-      $this->set_logged_in($email);
-      return TRUE;
+			$this->setLoggedIn();
+			return true;
 
-    } else {
-      return FALSE;
-    }
-  }
+		} else {
+			return false;
+		}
+	}
+ 
 
-  function get_groups() {
-  
-      try {
-        $stmt = $GLOBALS['db']->prepare("SELECT g.id, g.user_group 
-                                         FROM user_group_membership ugm 
-                                           LEFT JOIN user_group g ON ugm.group_id = g.id 
-                                         WHERE ugm.user_id=:id");
-                                         
-	    $stmt->bindValue(':id', $this->id);
-	    $stmt->execute();
-	    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			
-		  foreach ($rows as $row) {
-        $this->groups[] = $row['id'];
-      }
-	  } 
-	  catch (Exception $e) {
-	    $GLOBALS['log']->log_error($e);
-	  }			
-	}	
-  
-  function get_group_roles() {
-  
-      try {
-        $stmt = $GLOBALS['db']->prepare("SELECT r.role, 
-                                                et.entity, 
-                                                r.entity_id 
-                                       FROM user_group_role_membership ugrm 
-                                       LEFT JOIN user_role r 
-                                         ON ugrm.role_id = r.id 
-                                       LEFT JOIN entity_type et 
-                                         ON r.entity_type_id = et.id 
-                                       WHERE ugrm.deleted=0
-                                       AND ugrm.group_id IN (:group_ids)");
-
-	    $stmt->bindValue(':group_ids', implode(',',$this->groups));
-	    $stmt->execute();
-	    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			
-		foreach ($rows as $row) {
-          $this->group_roles[] = array('role' => $row['role'], 
-                                       'entity' => $row['entity'], 
-                                       'entity_id' => $row['entity_id']);
-        }
-	  } 
-	  catch (Exception $e) {
-	    $GLOBALS['log']->log_error($e);
-	  }			
-	}	 
-  
-  function get_roles() {
-  
-      try {
-        $stmt = $GLOBALS['db']->prepare("SELECT r.role, 
-                                                et.entity, 
-                                                r.entity_id 
-                                       FROM user_role_membership urm 
-                                       LEFT JOIN user_role r 
-                                         ON urm.role_id = r.id 
-                                       LEFT JOIN entity_type et 
-                                         ON r.entity_type_id = et.id 
-                                       WHERE urm.user_id=:id");
-	    $stmt->bindValue(':id', $this->id);
-	    $stmt->execute();
-	    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			
-		foreach ($rows as $row) {
-          $this->roles[] = array('role' => $row['role'], 
-                                 'entity' => $row['entity'], 
-                                 'entity_id' => $row['entity_id']);
-        }
-	  } 
-	  catch (Exception $e) {
-	    $GLOBALS['log']->log_error($e);
-	  }			
-	}	 
-  
+	/**
+	 * Quick redirect user
+	 * 
+	 * @param none
+	 * 
+	 * @return void
+	 * 
+	 **/  
 	function redirect($path)
 	{
 		header( 'Location: ' . BASE_URL . $path );
 	}
   
+
+
   
-  /*
-   * Check the user exists
-   */		
-  public static function verify_user($email) {
-    
-    try {
-      
-      $stmt = $GLOBALS['db']->prepare("SELECT id 
-                                       FROM user 
-                                       WHERE email=:email"); 
-                                       
-      $stmt->bindValue(':email', $email);  
-      $stmt->execute();
-      if($result = $stmt->fetch()){
-        return $result['id'];
-      } else {
-        return FALSE;
-      }    
-      
-    } catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-    
-  } 
-  
-  /*
-   * Check the user exists
-   */		
-  public static function verify_slug($slug) {
-    
-    try {
-      
-      $stmt = $GLOBALS['db']->prepare("SELECT id 
-                                       FROM user 
-                                       WHERE slug=:slug"); 
-                                       
-      $stmt->bindValue(':slug', $slug);  
-      $stmt->execute();
-      if($result = $stmt->fetch()){
-        return $result['id'];
-      } else {
-        return FALSE;
-      }    
-      
-    } catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-    
-  } 
-  
-  /*
-   * Check the user has a role
-   */		
-  public static function verify_role($user_id,$role_id) {
-    
-    try {
-      
-      $stmt = $GLOBALS['db']->prepare("SELECT id 
-                                       FROM user_role_membership 
-                                       WHERE user_id=:user_id
-                                       AND role_id=:role_id 
-                                       AND deleted=0 "); 
-                                       
-      $stmt->bindValue(':user_id', $user_id);  
-      $stmt->bindValue(':role_id', $role_id);  
-      $stmt->execute();
-      if($result = $stmt->fetch()){
-        return $result['id'];
-      } else {
-        return FALSE;
-      }    
-      
-    } catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-  }  
-  
-  /*
-   * Check the user has a role
-   */		
-  public static function verify_role_deleted($user_id,$role_id) {
-    
-    try {
-      
-      $stmt = $GLOBALS['db']->prepare("SELECT id 
-                                       FROM user_role_membership 
-                                       WHERE user_id=:user_id
-                                       AND role_id=:role_id 
-                                       AND deleted=1"); 
-                                       
-      $stmt->bindValue(':user_id', $user_id);  
-      $stmt->bindValue(':role_id', $role_id);  
-      $stmt->execute();
-      if($result = $stmt->fetch()){
-        return $result['id'];
-      } else {
-        return FALSE;
-      }    
-      
-    } catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-  }      
+   
 
   /*
    * Create a new user
@@ -839,7 +791,7 @@ For any queries or bug reporting please contact support
         return FALSE;			
     }
     catch (Exception $e)  {
-      $GLOBALS['log']->log_error($e);
+      $GLOBALS['log']->logError($e);
       return FALSE;
     }
   }
@@ -862,7 +814,7 @@ For any queries or bug reporting please contact support
 
     if(file_exists($template)) 
     {
-      $this->log->log_debug("USER: Sending html notification to $to, reading template: $template "); 
+      $this->log->logDebug("USER: Sending html notification to $to, reading template: $template "); 
 
       $fh = fopen($template, 'r');
       $html_message = fread($fh, filesize($template));
@@ -913,7 +865,7 @@ $html_message
     } 
     else 
     {
-      $GLOBALS['log']->log_debug("USER CREATED: Sending plain text notification to $to"); 
+      $GLOBALS['log']->logDebug("USER CREATED: Sending plain text notification to $to"); 
       $message = "
 
 Welcome to " . APP_NAME . "
@@ -940,91 +892,99 @@ For any queries or bug reporting please contact your administrator.
 	}  
   
 
+	/**
+	 * Update just the user's core attributes first_name, last_name, email
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Update success
+	 * 
+	 **/
+	public function save() 
+	{
+		// Not a valid user
+		if ($this->id == null)
+			return false;		
 
-  /*
-   * Update the user details
-   */		
-  function save() {
-    
-    $slug = User::slugify($this->first_name . " " . $this->last_name);
-    
-    if(User::verify_slug($slug)) {
-      $counter = 1;
-      $original_slug = $slug;
-      $slug = $original_slug . '-' . $counter;
-      while(User::verify_slug($slug)) {
-        $counter++;
-        $slug = $original_slug . '-' . $counter;
-      }
-    }        
-    
-    $this->last_error = '';
-    // Not a valid user
-    if (($this->id == 0)  || ($this->id == '') || ($this->id == null))
-      return FALSE;
+		$slug = User::slugify($this->first_name . " " . $this->last_name);
 
-    try {
-      $stmt = $GLOBALS['db']->prepare("UPDATE user 
-                                       SET
-                                         enabled=:enabled,
-                                         first_name=:first_name,
-                                         last_name=:last_name,                                       
-                                         slug=:slug,
-                                         email=:email
-                                       WHERE id=:id");
+		if ($this->slug != $slug) {
 
-      $stmt->bindValue(':enabled',     $this->enabled);        
-      $stmt->bindValue(':first_name',  $this->first_name);
-      $stmt->bindValue(':last_name',   $this->last_name);      
-      $stmt->bindValue(':slug',        $slug);
-      $stmt->bindValue(':email',       $this->email);  
-      $stmt->bindValue(':id',          $this->id);
-      
-      if ($stmt->execute()) {
-        if ($this->password != '')
-          $this->set_password($this->password);
-        
-        return TRUE;
-      }
-      else {
-        return FALSE;
-      }	
-    }
-    catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }			
-  }
-  
-  /*
-   * Update users photo_url
-   */  
-  public function save_photo_url($url) {
-    
-    try {
-      $stmt = $GLOBALS['db']->prepare("UPDATE user_custom 
-                                       SET photo_url = :url 
-                                       WHERE user_id=:id");
-                                       
-      $stmt->bindValue(':id',  $this->id);
-      $stmt->bindValue(':url', $url);
-      if ($stmt->execute()) {
-        return TRUE;
-      }
-      else {
-        return FALSE;
-      }
-    } 
-    catch (Exception $e) {
-      $GLOBALS['log']->log_error($e);
-      return FALSE;
-    }
-  }   
+			if(User::verify_slug($slug)) {
+				$counter = 1;
+				$original_slug = $slug;
+				$slug = $original_slug . '-' . $counter;
+				while(User::verify_slug($slug)) {
+					$counter++;
+					$slug = $original_slug . '-' . $counter;
+				}
+			}
+		}
 
-	/*
-	 * Update users first name
-	 */  
-	public function save_first_name() {
+		try {
+			$stmt = $GLOBALS['db']->prepare("UPDATE user 
+											SET first_name=:first_name,
+												last_name=:last_name,
+												slug=:slug,
+												email=:email 
+											WHERE id=:id");
+		   
+			$stmt->bindValue(':first_name',  $this->first_name);
+			$stmt->bindValue(':last_name',   $this->last_name);      
+			$stmt->bindValue(':slug',        $slug);
+			$stmt->bindValue(':email',       $this->email);  
+			$stmt->bindValue(':id',          $this->id);
+
+			if ($stmt->execute()) {
+				return true;
+			} else {
+				return false;
+			}	
+		} catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
+		}			
+	}
+
+	/**
+	 * Update just the user's photo url
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Update success
+	 * 
+	 **/
+	public function savePhotoURL() {
+
+		try {
+			$stmt = $this->db->prepare("UPDATE user_custom 
+										SET photo_url=:url 
+										WHERE user_id=:id");
+
+			$stmt->bindValue(':id',    $this->id);
+			$stmt->bindValue(':fname', $this->photo_url);
+			
+			if ($stmt->execute()) {
+				return true;
+			} else {
+				return false;
+			}
+		} 
+		catch (Exception $e) {
+			$this->log->logError($e);
+			return false;
+	    }
+	}
+
+	/**
+	 * Update just the user's first name
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Update success
+	 * 
+	 **/
+	public function saveFirstName() {
 
 		try {
 			$stmt = $this->db->prepare("UPDATE user 
@@ -1041,15 +1001,20 @@ For any queries or bug reporting please contact your administrator.
 			}
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 	    }
 	}
-  
-	/*
-	 * Update users first name
-	 */  
-	public function save_last_name() {
+
+	/**
+	 * Update just the user's last name
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Update success
+	 * 
+	 **/
+	public function saveLastName() {
 
 		try {
 			$stmt = $this->db->prepare("UPDATE user 
@@ -1066,14 +1031,19 @@ For any queries or bug reporting please contact your administrator.
 			}
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 		}
 	}     
 
-	/*
-	 * Mark user deleted
-	 */  
+	/**
+	 * Mark the user account as deleted
+	 * 
+	 * @param none
+	 * 
+	 * @return bool Mark deleted successful
+	 * 
+	 **/
 	public function delete () {
 
 		if ($this->id == 0)
@@ -1092,7 +1062,7 @@ For any queries or bug reporting please contact your administrator.
 			}
 		} 
 		catch (Exception $e) {
-			$this->log->log_error($e);
+			$this->log->logError($e);
 			return false;
 		}
 	}      

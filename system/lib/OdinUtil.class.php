@@ -80,9 +80,9 @@ class OdinUtil
 	 *
 	 * @return string A password salt
 	 */ 	
-	public static function get_salt() 
+	public static function getSalt() 
 	{
-		$salt = base64_encode(mcrypt_create_iv(24, MCRYPT_DEV_URANDOM));
+		$salt = base64_encode(random_bytes(24));
 		return $salt;
 	}
 	
@@ -94,7 +94,7 @@ class OdinUtil
 	 *
 	 * @return string $hash
 	 **/ 	
-	public static function get_hash($password,$salt) 
+	public static function getHash($password,$salt) 
 	{
 		// USE SHA512
 		return crypt($password, '$6$rounds=10000$' . $salt);

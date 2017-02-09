@@ -8,7 +8,5 @@ If it helps you to... enjoy :)
 
 ### Requirements
 * Web server with rewrite
-* php > 7
-** Works on > 5.3 currently but not a goal
-* php mcrypt
+* php > 7.0 
 * php PDO
