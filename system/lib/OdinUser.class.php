@@ -499,69 +499,17 @@ class OdinUser
 			$stmt->bindValue(':hash',  $hash);
 			$stmt->bindValue(':email', $this->email);
 										
-			if ($stmt->execute()) {
-
-
-        if ($stmt->execute()) {
-          // TODO: Update audit log, send email
-          
-          $template = TEMPLATE_DIR . DS . 'email' . DS . 'password-reset.html';
-
-          if(defined('EMAIL_FROM'))
-            $from = EMAIL_FROM;
-          else
-            $from = 'no-reply@noreply.com';   
-            
-          if(file_exists($template)) {
-            $GLOBALS['log']->logDebug("USER: Sending html notification to $email, reading template: $template "); 
-
-            $fh = fopen($template, 'r');
-            $html_message = fread($fh, filesize($template));
-            fclose($fh);	
-            $html_message = str_replace('{{BASE_URL}}', BASE_URL, $html_message);
-            $html_message = str_replace('{{USERNAME}}', $email, $html_message);
-            $html_message = str_replace('{{PASSWORD}}', $password, $html_message);	          
-          }
-          
-          $text_message = "
-Hello {{USERNAME}}
-
-Your password has been reset.
-
-Please use the details provided to log in and change your password as soon as possible.
-
-URL: {{BASE_URL}}
-Password: {{PASSWORD}}
-
-For any queries or bug reporting please contact support          
-          ";   
-          
-          $text_message = str_replace('{{BASE_URL}}', BASE_URL, $text_message);
-          $text_message = str_replace('{{USERNAME}}', $email, $text_message);
-          $text_message = str_replace('{{PASSWORD}}', $password, $text_message);	 
-          
-          $mail = new PHPMailer;
-          $mail->isSendmail();
-          $mail->setFrom($from, APP_NAME);
-          $mail->addAddress($email); 
-          $mail->isHTML(true); 
-          $mail->Subject = APP_NAME . ' password reset';
-          $mail->Body    = $html_message;
-          $mail->AltBody = $text_message;
-
-          $send = $mail->send();
-          if ($send) {
-            return TRUE;
-          }
-          else {
-            $GLOBALS['log']->logError("EMAIL: Could not send password reset email: $email \n". $mail->ErrorInfo);
-            return FALSE;
-          }
-        }				
+			if ($stmt->execute()) {			
 				
+				$variables['username'] = $this->email; 
+				$variables['password'] = $pass; 
+				$variables['base_url'] = BASE_URL;
+				$template = "email" . DIRECTORY_SEPARATOR . "password-reset.html";
+				
+				Util::sendTemplateMail($template,$variables); 
 
 			} else {
-				$this->log->logError("USER: Unable to reset password for user " . $this->email);
+				$this->log->logError("PASSWORD: Reset failed for user " . $this->email);
 				return false;
 			}
 		}

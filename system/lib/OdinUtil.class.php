@@ -13,6 +13,19 @@ namespace Odin\Base;
  
 class OdinUtil 
 {
+	/**
+	 * A database connection tha is responsible for all data 
+	 * persistence and retrieval.
+	 * @var PDO
+	 */  
+	public static $db = null;
+	
+	/**
+	 * The logger that handles writing logs to file.
+	 * @var Log
+	 */  
+	public static $log = null;	
+	
 	/*
 	 * Create a URL safe slug from a string of text
 	 *
@@ -98,5 +111,90 @@ class OdinUtil
 	{
 		// USE SHA512
 		return crypt($password, '$6$rounds=10000$' . $salt);
-	}	
+	}
+
+	
+	/**
+	 * Send an email using an html template 
+	 *
+	 * @param string $template  Name of the *twig* template
+	 * @param string $subject   Subject line for new mail
+	 * @param string $variables Array of variables to be replaced in the template
+	 * @param string $text_version Plain text version of the email
+	 *
+	 * @return bool
+	 **/ 	
+	public static sendTemplateMail($template,$subject,
+									$variables,$text_version='')
+	{
+		$template_path = TEMPLATE_DIR . DS . $template;
+		
+		if (! file_exists($template_path)) {
+			if (self::$log != null)
+				self::$log->logError("$template_path does not exists!");
+			return false;
+		}
+		
+		if (defined('EMAIL_FROM')) {
+			$from = EMAIL_FROM;
+		} else {
+			$from = 'no-reply@noreply.com';
+		}
+		
+		// Read the template as a string  
+		$fh = fopen($template_path, 'r');
+		$html_message = fread($fh, filesize($template_path));
+		fclose($fh);
+		
+		// Loop through variables replacing variables in the template
+		foreach ($variables as $key => $var) {
+			$html_message = str_replace('{{' . strtoupper($$key) . '}}', $var, $html_message);
+		}
+		
+		$mail = new PHPMailer;
+		$mail->isSendmail();
+		$mail->setFrom($from, APP_NAME);
+		$mail->addAddress($email); 
+		$mail->isHTML(true); 
+		$mail->Subject = $subject;
+		$mail->Body    = $html_message;
+		$mail->AltBody = $text_version;
+
+		$send = $mail->send();
+		if ($send) {
+			return true;
+		} else {
+			if (self::$log != null)
+				self::$log->logError("EMAIL: Could not send email: " . $mail->ErrorInfo);
+			return false;
+		}
+	}
+	
+	/**
+	 * Send an email using an html template 
+	 *
+	 * @param string $template Name of the *twig* template
+	 * @param string $subject Subject line for email
+	 *
+	 * @return bool
+	 **/ 	
+	public static sendTextMail($text,$subject)
+	{			
+		$mail = new PHPMailer;
+		$mail->isSendmail();
+		$mail->setFrom($from, APP_NAME);
+		$mail->addAddress($email); 
+		$mail->isHTML(false); 
+		$mail->Subject = $subject;
+		$mail->Body    = $text;
+
+		$send = $mail->send();
+		if ($send) {
+			return true;
+		} else {
+			if (self::$log != null)
+				self::$log->logError("EMAIL: Could not send email: " . $mail->ErrorInfo);
+			return false;
+		}
+	}
 }

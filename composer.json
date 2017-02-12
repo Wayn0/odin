@@ -1,5 +1,7 @@
 {
 	"require": {
-		"wayne-oliver/log": "~0.1.0"
+		"wayne-oliver/log": "~0.1.0",
+		"twig/twig": "~2.0",
+		"phpmailer/phpmailer": "~5.2"
 	}
 }
