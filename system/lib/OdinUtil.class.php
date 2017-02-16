@@ -197,4 +197,17 @@ class OdinUtil
 			return false;
 		}
 	}
+	
+	/**
+	 * Convert a byte size to a human readable form 
+	 *
+	 * @param int $size Number of bytes
+	 *
+	 * @return string $bytes
+	 **/ 		
+	public static function bytes_size($size)
+	{
+		$unit = array('b','kb','mb','gb','tb','pb');
+		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+	}	
 }

@@ -195,3 +195,4 @@ if (file_exists(APPLIB_DIR . 'app-init.inc.php')) {
 	require_once(APPLIB_DIR . 'app-init.inc.php');
 }  
 require_once(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php');
+$log->logDebug("Memory used by call: " . Util::bytes_size((memory_get_usage() - START_MEMORY_USAGE)) . " Time: " . round((microtime(true) - START_TIME),2) . "s");

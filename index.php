@@ -22,10 +22,10 @@ define('START_MEMORY_USAGE', memory_get_usage());
 
 // Server details
 if (empty($_SERVER['HTTPS'])) {
-  $protocol = 'http';
+	$protocol = 'http';
 }
 else {
-  $protocol = 'https';
+	$protocol = 'https';
 }
 
 $port = '';
@@ -67,31 +67,27 @@ define('CACHE_DIR', ROOT . DS . 'cache' . DS);
 
 // Check that the app is installed and configured
 if (!file_exists(CONF_DIR . 'config.inc.php')) {
-  //include 'install.php';
-  //TODO: Implement install.php
-  die("ERROR: Application not correctly installed, missing config.");
-}
+	//include 'install.php';
+	//TODO: Implement install.php
+	die("ERROR: Application not correctly installed, missing config.");
 
-// Check the environment before starting the application 
-if ((!file_exists(LOG_DIR)) || (!is_writable(LOG_DIR)) || (phpversion() < 7.0)) {
-  //include 'errors/init-error.inc.php';
-  //TODO: ERROR Handling
-  echo "<p>ERROR: Initializing application!</p>";
-  echo "<p>check the following</p>";
-  echo "<p>PHP Version: " . floor(phpversion()) . " required 7.x</p> ";
-  die("<p>Check that " . LOG_DIR . " exists and is writable by your web server</p>");
-}
-else {
-  // Get the requested URL
-  if (!isset($_GET['url'])) {
-    $url="/";
-  }
-  else {
-    $url = filter_input(INPUT_GET, 'url', FILTER_SANITIZE_STRING);
-  }
-  
-  // Load the config
-  require_once(CONF_DIR . 'config.inc.php');
-  // Start base the application
-  require_once(LIB_DIR . 'init.inc.php');
+//Check the environment before starting the application 
+} else if ((!file_exists(LOG_DIR)) || (!is_writable(LOG_DIR)) || (phpversion() < 7.0)) {
+	//include 'errors/init-error.inc.php';
+	//TODO: ERROR Handling
+	echo "<p>ERROR: Initializing application!</p>";
+	echo "<p>check the following</p>";
+	echo "<p>PHP Version: " . floor(phpversion()) . " required 7.x</p> ";
+	die("<p>Check that " . LOG_DIR . " exists and is writable by your web server</p>");
+} else {
+	// Get the requested URL
+	if (!isset($_GET['url'])) {
+		$url="/";
+	} else {
+		$url = filter_input(INPUT_GET, 'url', FILTER_SANITIZE_STRING);
+	}
+	// Load the config
+	require_once(CONF_DIR . 'config.inc.php');
+	// Start base the application
+	require_once(LIB_DIR . 'init.inc.php');
 }
