@@ -27,7 +27,8 @@ class OdinUser
 	protected $log = null;
 	
 	/**
-	 * The user's id 
+	 * The user's id 		if (!$uid = User::verify_user($email))
+			$uid = User::create(1,$email,3,$first_name,$last_name);
 	 * @var int
 	 */  
 	protected $id = null;
@@ -667,82 +668,85 @@ class OdinUser
 		header( 'Location: ' . BASE_URL . $path );
 	}
   
-
-
   
-   
 
-  /*
-   * Create a new user
-   */			
-  public static function create($user_id,$email,
-                                $auth_provider_id,$first_name,
-                                $last_name,$password=''){
-    
-    $slug = User::slugify($first_name . " " . $last_name);
-    
-    if(User::verify_slug($slug)) {
-      $counter = 1;
-      $original_slug = $slug;
-      $slug = $original_slug . '-' . $counter;
-      while(User::verify_slug($slug)) {
-        $counter++;
-        $slug = $original_slug . '-' . $counter;
-      }
-    }   
-  
-    try { 
-      $stmt = $GLOBALS['db']->prepare("INSERT INTO user 
-                                       (created_by_id,email,  
-                                        authentication_provider_id, 
-                                        first_name,last_name,slug)
-                                         
-                                       VALUES(:user_id,:email,
-                                              :authentication_provider_id, 
-                                              :first_name,:last_name,:slug)");
-                                              
-      $stmt->bindValue(':user_id',    $user_id);
-      $stmt->bindValue(':authentication_provider_id', $auth_provider_id);        
-      $stmt->bindValue(':email',      $email);  
-      $stmt->bindValue(':first_name', $first_name);							
-      $stmt->bindValue(':last_name',  $last_name);
-      $stmt->bindValue(':slug',       $slug);
+	/**
+	 * Check if the user is logged in
+	 * 
+	 * @param none
+	 * 
+	 * @return bool
+	 * 
+	 **/ 
+	public function create()
+	{
 
-      
-      if($stmt->execute()) { 
-        
-        $new_user_id = $GLOBALS['db']->lastInsertId();
-        // create user_custom entry
-        $stmt2 = $GLOBALS['db']->prepare("INSERT INTO user_custom (user_id) VALUES (:new)");
-        $stmt2->bindValue(':new', $new_user_id);
-        $stmt2->execute();
-        $new_user = new User($GLOBALS['params'],$new_user_id);
-        
-        if($auth_provider_id == 1) {
-          
-          // Only bother with the password if the user
-          if ($password == '') {
-            $password = User::random_string(MIN_PASSWORD_LENGTH);
-            $new_user->set_password($password);
-          }
-          else {
-            $new_user->set_password($password);
-          }
-        } else if ($auth_provider_id == 2) {
-          $password = "Please use the Google login";
-        }
-        // Send a welcome mail
-        $new_user->send_welcome_email($password);
-        return $new_user_id;
-      }
-      else
-        return FALSE;			
-    }
-    catch (Exception $e)  {
-      $GLOBALS['log']->logError($e);
-      return FALSE;
-    }
-  }
+		$slug = Util::slugify($first_name . " " . $last_name);
+
+		if(User::verifySlug($slug)) {
+			$counter = 1;
+			$original_slug = $slug;
+			$slug = $original_slug . '-' . $counter;
+			while(User::verifySlug($slug)) {
+				$counter++;
+				$slug = $original_slug . '-' . $counter;
+			}
+		}   
+
+		try { 
+			$stmt = $this->db->prepare("INSERT INTO user 
+											(created_by_id,email,
+											authentication_provider_id,
+											first_name,last_name,slug)
+										VALUES(:created_by_id,:email,
+											:auth_prov_id,
+											:first_name,:last_name,:slug)");
+
+			$stmt->bindValue(':created_by_id', $this->created_by_id);
+			$stmt->bindValue(':auth_prov_id',  $this->auth_provider_id);        
+			$stmt->bindValue(':email',         $this->email);  
+			$stmt->bindValue(':first_name',    $this->first_name);							
+			$stmt->bindValue(':last_name',     $this->last_name);
+			$stmt->bindValue(':slug',          $slug);
+
+
+			if($stmt->execute()) { 
+
+				// create user_custom entry
+				$stmt2 = $this->db->prepare("INSERT INTO user_custom (user_id) VALUES (:new)");
+				$stmt2->bindValue(':new', $this->db->lastInsertId());
+				$stmt2->execute();
+
+				if($this->auth_provider_id == 1) {
+
+					// Only bother with the password if the user
+					if ($password == '') {
+					$password = User::random_string(MIN_PASSWORD_LENGTH);
+					$new_user->set_password($password);
+					}
+					else {
+					$new_user->set_password($password);
+					}
+				} else if ($auth_provider_id == 2) {
+					$password = "Please use the Google login";
+				}
+				} else if ($auth_provider_id == 3) {
+					$password = "Please use the Facebook login";
+				}
+				} else if ($auth_provider_id == 4) {
+					$password = "Please use the Twitter login";
+				}
+				// Send a welcome mail
+				$new_user->send_welcome_email($password);
+				return $new_user_id;
+			} else {
+				return false;
+			}
+		} catch (Exception $e)  {
+			$this->log->logError($e);
+			return false;
+		}
+	}
   
   // Send welcome email
 	public function send_welcome_email($password = "")
