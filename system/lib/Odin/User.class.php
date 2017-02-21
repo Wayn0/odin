@@ -740,6 +740,7 @@ Thank you";
 					if ($this->password == null) {
 						$this->password = Util::getRandomString(MIN_PASSWORD_LENGTH);
 						$this->setPassword($this->password);
+						$this->password = "Supplied at registration";
 					} else {
 						$this->setPassword($this->password);
 					}
