@@ -9,9 +9,9 @@
  *
  **/
  
-namespace Odin\Base;
+namespace Odin;
  
-class OdinUser 
+class User 
 {
 	/**
 	 * A database connection tha is responsible for all data 
@@ -275,7 +275,7 @@ class OdinUser
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$this->log->logError($e);
 			return array();
 		}
@@ -299,7 +299,7 @@ class OdinUser
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$this->log->logError($e);
 			return array();
 		}
@@ -323,7 +323,7 @@ class OdinUser
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$this->log->logError($e);
 			return array();
 		}
@@ -350,8 +350,8 @@ class OdinUser
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $rows;			
-		catch (Exception $e) {
-			$this->log->logError($e);
+		} catch (Exception $e) {
+			$log->logError($e);
 			return array();
 		}
 	}		
@@ -376,7 +376,7 @@ class OdinUser
 
 		try {
 
-			$stmt = $this->db>prepare("SELECT id FROM user WHERE slug=:slug"); 
+			$stmt = $db->prepare("SELECT id FROM user WHERE slug=:slug"); 
 										   
 			$stmt->bindValue(':slug', $slug);  
 			$stmt->execute();
@@ -388,7 +388,7 @@ class OdinUser
 			}
 		
 		} catch (Exception $e) {
-			$this->log->logError($e);
+			$log->logError($e);
 			return false;
 		}
 	} 
@@ -413,7 +413,7 @@ class OdinUser
 
 		try {
 
-			$stmt = $this->db>prepare("SELECT id FROM user WHERE email=:email"); 
+			$stmt = $db->prepare("SELECT id FROM user WHERE email=:email"); 
 										   
 			$stmt->bindValue(':email', $email);  
 			$stmt->execute();
@@ -425,7 +425,7 @@ class OdinUser
 			}
 		
 		} catch (Exception $e) {
-			$this->log->logError($e);
+			$log->logError($e);
 			return false;
 		}
 	} 
@@ -444,7 +444,7 @@ class OdinUser
 	public function verifyPassword($email, $password)
 	{
 		try {
-			$stmt = $this->db->prepare("SELECT u.hash,u.salt F
+			$stmt = $this->db->prepare("SELECT u.hash,u.salt
 										FROM user u 
 										WHERE email=:email
 										AND u.authentication_provider_id = 1 
@@ -458,8 +458,7 @@ class OdinUser
 				$this->set_logged_in($email);
 				return true;
 			}
-		}
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$this->log->logError($e);
 			return array();
 		}
@@ -475,7 +474,7 @@ class OdinUser
 	 **/
 	public function resetPassword()
 	{
-		if (! is_numeric($this->id) {
+		if (!is_numeric($this->id)) {
 			return false;
 		}
 		
@@ -513,8 +512,7 @@ class OdinUser
 				$this->log->logError("PASSWORD: Reset failed for user " . $this->email);
 				return false;
 			}
-		}
-		catch (Exception $e) {
+		} catch (Exception $e) {
 			$this->log->logError($e);
 			return array();
 		}
@@ -681,13 +679,14 @@ class OdinUser
 	public function create()
 	{
 
-		$slug = Util::slugify($first_name . " " . $last_name);
+		$slug   = Util::slugify($first_name . " " . $last_name);
+		$params = array('db' => $this->db, 'log' => $this->log);
 
-		if(User::verifySlug($slug)) {
+		if(User::verifySlug($params, $slug)) {
 			$counter = 1;
 			$original_slug = $slug;
 			$slug = $original_slug . '-' . $counter;
-			while(User::verifySlug($slug)) {
+			while(User::verifySlug($params, $slug)) {
 				$counter++;
 				$slug = $original_slug . '-' . $counter;
 			}
@@ -729,10 +728,8 @@ class OdinUser
 					}
 				} else if ($auth_provider_id == 2) {
 					$password = "Please use the Google login";
-				}
 				} else if ($auth_provider_id == 3) {
 					$password = "Please use the Facebook login";
-				}
 				} else if ($auth_provider_id == 4) {
 					$password = "Please use the Twitter login";
 				}

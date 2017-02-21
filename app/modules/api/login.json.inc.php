@@ -30,7 +30,7 @@
  * @apiError BadUsernamePassword  Bad username / password combinations
  * @apiErrorExample {json} BadUsernamePassword:
  * 	HTTP/1.1 401 Unauthorized
- * 	{"tag":"login","success":0,"error":3,"error_msg":"Bad username or password!"
+ * 	{"tag":"login","success":0,"error":3,"error_msg":"Bad username or password!"}
  * 
  */
   
@@ -45,9 +45,9 @@ if (isset($_POST['email'])) {
 	if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
 		// Valid email being checking
 		$log->logDebug("LOGIN JSON: attempt: $username");
-		if($user->verify_password($username, $password)) {
+		if($user->verifyPassword($username, $password)) {
 			$log->logInfo("LOGIN JSON: success: $username");
-			$user->set_last_login();
+			$user->setLastLogin();
 			
 			$tokenId    = base64_encode(mcrypt_create_iv(32));
 			$issuedAt   = time();
@@ -83,6 +83,7 @@ if (isset($_POST['email'])) {
 			header("HTTP/1.1 200 Ok"); 
 				
 		} else {
+			$log->logError("LOGIN: Bad username or password");
 			$json_data['tag'] = "login";
 			$json_data['success'] = 0;
 			$json_data['error'] = 3;
@@ -92,6 +93,7 @@ if (isset($_POST['email'])) {
 		}
 		
 	} else {
+		$log->logError("LOGIN: Invalid email address");
 		$json_data['tag'] = "login";
 		$json_data['success'] = 0;
 		$json_data['error'] = 2;
@@ -100,6 +102,7 @@ if (isset($_POST['email'])) {
 		header("HTTP/1.1 400 Bad Request"); 
 	}
 } else {
+	$log->logError("LOGIN: Invalid Request, missing parameters");
 	$json_data['tag'] = "login";
 	$json_data['success'] = 0;
 	$json_data['error'] = 1;

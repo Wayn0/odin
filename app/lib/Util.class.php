@@ -9,7 +9,8 @@
  *
  **/
  
-namespace Odin\Base;
+
+use \Odin\Util as OdinUtil;
  
 class Util extends OdinUtil 
 {

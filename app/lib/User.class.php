@@ -9,7 +9,7 @@
  *
  **/
  
-namespace Odin\Base;
+use \Odin\User as OdinUser;
  
 class User extends OdinUser 
 {

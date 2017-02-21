@@ -9,9 +9,9 @@
  *
  **/
  
-namespace Odin\Base;
+namespace Odin;
  
-class OdinUtil 
+class Util 
 {
 	/**
 	 * A database connection tha is responsible for all data 
@@ -124,7 +124,7 @@ class OdinUtil
 	 *
 	 * @return bool
 	 **/ 	
-	public static sendTemplateMail($template,$subject,
+	public static function sendTemplateMail($template,$subject,
 									$variables,$text_version='')
 	{
 		$template_path = TEMPLATE_DIR . DS . $template;
@@ -178,7 +178,7 @@ class OdinUtil
 	 *
 	 * @return bool
 	 **/ 	
-	public static sendTextMail($text,$subject)
+	public static function sendTextMail($text,$subject)
 	{			
 		$mail = new PHPMailer;
 		$mail->isSendmail();

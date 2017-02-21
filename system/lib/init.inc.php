@@ -14,11 +14,14 @@
 
 // Autoload classes from the LIB dir
 spl_autoload_register(function ($class_name) {
-	if (file_exists(LIB_DIR . DS . $class_name . '.class.php')) {
-		require_once(LIB_DIR . DS . $class_name . '.class.php');
+	
+	$path = str_replace('\\', DS, $class_name);
+	
+	if (file_exists(LIB_DIR . $path . '.class.php')) {
+		require_once(LIB_DIR . $path . '.class.php');
 	}
-	if (file_exists(APPLIB_DIR . DS . $class_name . '.class.php')) {
-		require_once(APPLIB_DIR . DS . $class_name . '.class.php');
+	if (file_exists(APPLIB_DIR . $path . '.class.php')) {
+		require_once(APPLIB_DIR . $path . '.class.php');
 	}
 });
 
@@ -178,7 +181,11 @@ if($request_method == "GET" || $request_method == "POST") {
 	  $method_array["password1"]= "**************";
 	if (array_key_exists("password2",$method_array))
 	  $method_array["password2"]= "**************";
-	$request_details = print_r($method_array,true);
+	if(!empty($method_array)) {
+		$request_details = print_r($method_array,true);
+	} else {
+		$request_details = "";
+	}
 }
 
 // Display any uploads if passed
@@ -186,13 +193,21 @@ if(isset($_FILES) && !empty($_FILES))
 	$files = "Files: " . print_r($_FILES,true);
 else
 	$files = "";
+	
+  
+ $ip = getenv('HTTP_CLIENT_IP')?:
+getenv('HTTP_X_FORWARDED_FOR')?:
+getenv('HTTP_X_FORWARDED')?:
+getenv('HTTP_FORWARDED_FOR')?:
+getenv('HTTP_FORWARDED')?:
+getenv('REMOTE_ADDR');
 
 // Call the requested page an log the call
-$log->logDebug("$request_method - $request_time - $url: $request_details $files");
+$log->logDebug("$ip $request_method - $url - $request_time: $request_details $files");
 
 // Load application specific init file before including the modules
 if (file_exists(APPLIB_DIR . 'app-init.inc.php')) {
 	require_once(APPLIB_DIR . 'app-init.inc.php');
 }  
 require_once(MOD_DIR . strtolower($module) . DS . strtolower($action) . '.inc.php');
-$log->logDebug("Memory used by call: " . Util::bytes_size((memory_get_usage() - START_MEMORY_USAGE)) . " Time: " . round((microtime(true) - START_TIME),2) . "s");
+$log->logDebug("Memory used by request: " . Util::bytes_size((memory_get_usage() - START_MEMORY_USAGE)) . " Time: " . round((microtime(true) - START_TIME),2) . "s");

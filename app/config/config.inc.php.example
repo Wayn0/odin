@@ -17,7 +17,7 @@ define('CUSTOMER_NAME','%APPNAME%');
 define('EMAIL_FROM','%EMAIL_FROM%');
 
 // Default Routing
-define('DEFAULT_MODULE', 'home');
+define('DEFAULT_MODULE', 'welcome');
 define('DEFAULT_ACTION', 'index');
 
 // Environment type

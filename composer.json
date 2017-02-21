@@ -2,6 +2,9 @@
 	"require": {
 		"wayne-oliver/log": "~0.1.0",
 		"twig/twig": "~2.0",
-		"phpmailer/phpmailer": "~5.2"
+		"phpmailer/phpmailer": "~5.2",
+		"firebase/php-jwt": "^4.0",
+		"facebook/graph-sdk": "^5.4",
+		"google/apiclient": "^2.0"
 	}
 }
