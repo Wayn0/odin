@@ -100,6 +100,12 @@ class User
 	protected $last_login = null;
 	
 	/**
+	 * Temp storage for setting a password at user creation
+	 * @var string
+	 */  
+	protected $password = null;
+	
+	/**
 	 * The user's photo URL
 	 * @var string
 	 */  
@@ -242,7 +248,6 @@ class User
 
 			$this->id               = $result['id'];
 			$this->deleted          = $result['deleted'];
-			$this->enabled          = $result['enabled'];
 			$this->created_date     = $result['created_date'];
 			$this->created_by_id    = $result['created_by_id'];
 			$this->auth_provider_id = $result['authentication_provider_id'];		
@@ -401,7 +406,7 @@ class User
 	 *
 	 * @return bool
 	 */	
-	public static function verifyEmail($params,$slug)
+	public static function verifyEmail($params,$email)
 	{
 		
 		try {
@@ -455,7 +460,7 @@ class User
 			$result = $stmt->fetch();
 			
 			if ($result['hash'] == Util::getHash($password,$result['salt'])) {
-				$this->set_logged_in($email);
+				$this->setLastLogin();
 				return true;
 			}
 		} catch (Exception $e) {
@@ -501,12 +506,27 @@ class User
 										
 			if ($stmt->execute()) {			
 				
-				$variables['username'] = $this->email; 
-				$variables['password'] = $pass; 
-				$variables['base_url'] = BASE_URL;
-				$template = "email" . DIRECTORY_SEPARATOR . "password-reset.html";
+				$variables['username']   = $this->email; 
+				$variables['first_name'] = $this->first_name; 
+				$variables['password']   = $pass; 
+				$variables['base_url']   = BASE_URL;
+				$subject                 = APP_NAME . " password reset";
 				
-				Util::sendTemplateMail($template,$variables); 
+				$template = "email" . DIRECTORY_SEPARATOR . "password-reset.twig";
+				
+				
+				$text_version = "
+Hello " . $this->first_name . ",
+
+Your password for " . BASE_URL . " has been reset.
+Please logon and change your password as soon asp possible.
+
+Username: " . $this->email . "
+Password: $pass
+
+Thank you";
+				
+				Util::sendTemplateMail($template,$subject,$this->email,$variables,$text_version='');
 
 			} else {
 				$this->log->logError("PASSWORD: Reset failed for user " . $this->email);
@@ -532,8 +552,8 @@ class User
 		if ($this->id == null)
 			return false;				
 
-		$salt = $this->get_salt();
-		$hash = $this->get_hash($password, $salt);
+		$salt = Util::getSalt();
+		$hash = Util::getHash($password, $salt);
 
 		try {
 			$stmt = $this->db->prepare("UPDATE user 
@@ -546,7 +566,7 @@ class User
 			
 			if ($stmt->execute()) {
 				$this->log->logDebug("PASSWORD: User:" . $this->email . " changed his/her password");
-				return tru;
+				return true;
 			} else {
 				return false;
 			}
@@ -651,7 +671,7 @@ class User
 			return false;
 		}
 	}
- 
+
 
 	/**
 	 * Quick redirect user
@@ -665,8 +685,6 @@ class User
 	{
 		header( 'Location: ' . BASE_URL . $path );
 	}
-  
-  
 
 	/**
 	 * Check if the user is logged in
@@ -679,7 +697,7 @@ class User
 	public function create()
 	{
 
-		$slug   = Util::slugify($first_name . " " . $last_name);
+		$slug   = Util::slugify($this->first_name . " " . $this->last_name);
 		$params = array('db' => $this->db, 'log' => $this->log);
 
 		if(User::verifySlug($params, $slug)) {
@@ -719,23 +737,44 @@ class User
 				if($this->auth_provider_id == 1) {
 
 					// Only bother with the password if the user
-					if ($password == '') {
-					$password = User::random_string(MIN_PASSWORD_LENGTH);
-					$new_user->set_password($password);
+					if ($this->password == null) {
+						$this->password = Util::getRandomString(MIN_PASSWORD_LENGTH);
+						$this->setPassword($this->password);
+					} else {
+						$this->setPassword($this->password);
 					}
-					else {
-					$new_user->set_password($password);
-					}
+					
 				} else if ($auth_provider_id == 2) {
-					$password = "Please use the Google login";
+					$this->password = "Please use the Google login";
 				} else if ($auth_provider_id == 3) {
-					$password = "Please use the Facebook login";
+					$this->password = "Please use the Facebook login";
 				} else if ($auth_provider_id == 4) {
-					$password = "Please use the Twitter login";
+					$this->password = "Please use the Twitter login";
 				}
-				// Send a welcome mail
-				$new_user->send_welcome_email($password);
-				return $new_user_id;
+
+				
+				$variables['username']   = $this->email; 
+				$variables['first_name'] = $this->first_name; 
+				$variables['password']   = $this->password; 
+				$variables['base_url']   = BASE_URL;
+				$subject                 = APP_NAME . " Account created";
+				
+				$template = "email" . DIRECTORY_SEPARATOR . "password-reset.twig";
+				
+				$text_version = "
+Hello " . $this->first_name . ",
+
+Your accout for " . BASE_URL . " has been activated.
+Please logon and change your password as soon asp possible.
+
+Username: " . $this->email . "
+Password: " . $this->password . "
+
+Thank you";
+				
+				Util::sendTemplateMail($template,$subject,$this->email,$variables,$text_version='');
+				
+				return true;
 			} else {
 				return false;
 			}
@@ -744,101 +783,6 @@ class User
 			return false;
 		}
 	}
-  
-  // Send welcome email
-	public function send_welcome_email($password = "")
-	{
-	
-    //Create the email to be sent with new password
-    $to = $this->email;
-    $subject = APP_NAME . ' Registration';	
-    $template = TEMPLATE_DIR . DS . 'email' . DS . 'new-user.html';
-
-    if(defined('EMAIL_FROM'))
-       $from = EMAIL_FROM;
-    else
-      $from = 'no-reply@noreply.com';
-
-    $headers = "From: $from";
-
-    if(file_exists($template)) 
-    {
-      $this->log->logDebug("USER: Sending html notification to $to, reading template: $template "); 
-
-      $fh = fopen($template, 'r');
-      $html_message = fread($fh, filesize($template));
-      fclose($fh);	
-      $random_hash = md5(date('r', time())); 
-
-      $headers .= "\r\nContent-Type: multipart/alternative; boundary=\"PHP-alt-".$random_hash."\""; 
-        
-      $message = "
---PHP-alt-$random_hash; 
-Content-Type: text/plain; charset=\"iso-8859-1\"
-Content-Transfer-Encoding: 7bit
-
-Welcome to " . APP_NAME . "
-
-A new account has been created for you. Your account details and URL link are listed below (please save the link as a bookmark):
-
-URL: " . BASE_URL . "
-Username: $to
-Password: $password
-
-If your mail server is hosted by Google you can utilise the Google login feature for your convenience. 
-Please note that by doing so your login password will be removed and only Google authentication will be able to be used.
-
-Our portal is an ever evolving platform so any feedback is valuable to us.
-
-For any queries or bug reporting please contact you administrator
-
-
-
---PHP-alt-$random_hash
-Content-Type: text/html; charset=\"iso-8859-1\"
-Content-Transfer-Encoding: 7bit
-
-$html_message
-      
-      ";
-        
-      // replace the variables from the html
-      $message = str_replace('{{BASE_URL}}', BASE_URL, $message);
-      $message = str_replace('{{USERNAME}}', $to, $message);
-      $message = str_replace('{{PASSWORD}}', $password, $message);				
-      
-      // Mail the new reset code
-      if (@mail($to,$subject,$message,$headers))
-        return true;
-
-    } 
-    else 
-    {
-      $GLOBALS['log']->logDebug("USER CREATED: Sending plain text notification to $to"); 
-      $message = "
-
-Welcome to " . APP_NAME . "
-
-A new account has been created for you. Your account details and URL link are listed below (please save the link as a bookmark):
-
-URL: " . BASE_URL . "
-Username: $to
-Password: $password
-
-If your mail server is hosted by Google you can utilise the Google login feature for your convenience. 
-Please note that by doing so your login password will be removed and only Google authentication will be able to be used.
-
-Our portal is an ever evolving platform so any feedback is valuable to us.
-
-For any queries or bug reporting please contact your administrator.
-      ";
-
-      // Mail the welcome message
-      if (@mail($to,$subject,$message,$headers))
-        return true;						
-
-    }	
-	}  
   
 
 	/**

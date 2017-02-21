@@ -124,7 +124,7 @@ class Util
 	 *
 	 * @return bool
 	 **/ 	
-	public static function sendTemplateMail($template,$subject,
+	public static function sendTemplateMail($template,$subject,$to,
 									$variables,$text_version='')
 	{
 		$template_path = TEMPLATE_DIR . DS . $template;
@@ -147,14 +147,14 @@ class Util
 		fclose($fh);
 		
 		// Loop through variables replacing variables in the template
-		foreach ($variables as $key => $var) {
-			$html_message = str_replace('{{' . strtoupper($$key) . '}}', $var, $html_message);
+		foreach ($variables as $key => $val) {
+			$html_message = str_replace('{{' . strtoupper($key) . '}}', $val, $html_message);
 		}
 		
-		$mail = new PHPMailer;
+		$mail = new \PHPMailer;
 		$mail->isSendmail();
+		$mail->addAddress($to);
 		$mail->setFrom($from, APP_NAME);
-		$mail->addAddress($email); 
 		$mail->isHTML(true); 
 		$mail->Subject = $subject;
 		$mail->Body    = $html_message;

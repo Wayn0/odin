@@ -49,7 +49,7 @@ if (isset($_POST['email'])) {
 			$log->logInfo("LOGIN JSON: success: $username");
 			$user->setLastLogin();
 			
-			$tokenId    = base64_encode(mcrypt_create_iv(32));
+			$tokenId    = base64_encode(random_bytes(32));
 			$issuedAt   = time();
 			$serverName = BASE_URL;			
 			

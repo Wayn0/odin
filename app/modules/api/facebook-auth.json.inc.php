@@ -38,7 +38,7 @@
  * 	{"tag":"facebookauth","success":0,"error":4,"error_msg":"Bad Key"}
  * 
  * @apiError ServerError  ServerError
- * @apiErrorExample {json} BadKey:
+ * @apiErrorExample {json} Server Error:
  * 	HTTP/1.1 500 Server Error
  * 	{"tag":"facebookauth","success":0,"error":4,"error_msg":"Could not create user: %username%"}
  * 
