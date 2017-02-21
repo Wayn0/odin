@@ -69,6 +69,7 @@ if (isset($_POST['email'])
 
 		// Check if user exists
 		if(User::verifyEmail($params, $username)) {
+			
 			$log->logError("REGISTER: username is already registered");
 			$json_data['tag'] = "registration";
 			$json_data['success'] = 0;
@@ -100,6 +101,7 @@ if (isset($_POST['email'])
 				exit;					
 				
 			} else {
+				
 				$log->logError("REGISTER: Internal Server Error Could not create user: $username");
 				$json_data['tag'] = "registration";
 				$json_data['success'] = 0;
@@ -112,6 +114,7 @@ if (isset($_POST['email'])
 		}
 		
 	} else {
+		
 		$log->logError("REGISTER: Invalid email address");
 		$json_data['tag'] = "registration";
 		$json_data['success'] = 0;
@@ -121,6 +124,7 @@ if (isset($_POST['email'])
 		header("HTTP/1.1 400 Bad Request"); 
 	}
 } else {
+	
 	$log->logError("REGISTER: Invalid Request, missing parameters");
 	$json_data['tag'] = "registration";
 	$json_data['success'] = 0;
