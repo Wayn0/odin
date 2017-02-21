@@ -9,6 +9,7 @@
  * @apiParam {String} email 		User's email address as a username
  * @apiParam {String} first_name	User's name
  * @apiParam {String} last_name 	User's surname
+ * @apiParam {String} password	 	User's password, optional.
  * 
  * @apiSuccess (200) {String} jwt Javascript web token for subsequent requests
  * 
@@ -62,6 +63,7 @@ if (isset($_POST['email'])
     $username   = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $first_name = filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_STRING);
     $last_name  = filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_STRING);
+    $password   = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
 	
 	if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
 
@@ -82,6 +84,9 @@ if (isset($_POST['email'])
 			$user->__set('first_name',$first_name);
 			$user->__set('last_name',$last_name);
 			$user->__set('auth_provider_id',1);
+			if (isset($password)) {
+				$user->__set('password',$password);
+			}
 			
 			if($user->create()) {
 				
