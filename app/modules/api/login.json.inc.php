@@ -14,6 +14,11 @@
  * @apiSuccessExample {json} Success-Response:
  * 	HTTP/1.1 200 OK
  * 	{
+ * 		"tag": "login",
+ * 		"success":1,
+ * 		"error":0,
+ * 		"first_name":"first name",
+ * 		"last_name":"last name",
  * 		"jwt":"xxxx.xxxx.xxxx"
  * 	}
  * 
@@ -25,12 +30,22 @@
  * @apiError InvalidEmail  Malformed email address
  * @apiErrorExample {json} InvalidEmail:
  * 	HTTP/1.1 400 Bad Request
- * 	{"tag":"login","success":0,"error":2,"error_msg":"Invalid Email address"}
+ * 	{
+ * 		"tag":"login",
+ * 		"success":0,
+ * 		"error":2,
+ * 		"error_msg":"Invalid Email address"
+ * 	}
  * 
  * @apiError BadUsernamePassword  Bad username / password combinations
  * @apiErrorExample {json} BadUsernamePassword:
  * 	HTTP/1.1 401 Unauthorized
- * 	{"tag":"login","success":0,"error":3,"error_msg":"Bad username or password!"}
+ * 	{
+ * 		"tag":"login",
+ * 		"success":0,
+ * 		"error":3,
+ * 		"error_msg":"Bad username or password!"
+ * 	}
  * 
  */
   
@@ -78,7 +93,13 @@ if (isset($_POST['email'])) {
 				'HS512'  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
 				);
 				
-			$unencodedArray =  ['jwt' => $jwt];
+			$unencodedArray =  ['jwt' => $jwt,
+								'tag' => "login",
+								'success' => 1,
+								'error' => 0,
+								'first_name' => $user->__get('first_name'),
+								'first_name' => $user->__get('lasst_name')
+								];
 			echo json_encode($unencodedArray);
 			header("HTTP/1.1 200 Ok"); 
 				
