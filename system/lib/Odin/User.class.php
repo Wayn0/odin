@@ -437,15 +437,14 @@ class User
 
 
 	/**
-	 * Verify email/username and password combination
+	 * Verify user's password 
 	 * 
-	 * @param string $email User's email address
 	 * @param string $password User's password
 	 * 
-	 * @return bool Do the username and password combination match?
+	 * @return bool valid password
 	 * 
 	 **/
-	public function verifyPassword($email, $password)
+	public function verifyPassword($password)
 	{
 		try {
 			$stmt = $this->db->prepare("SELECT u.hash,u.salt
@@ -454,7 +453,7 @@ class User
 										AND u.authentication_provider_id = 1 
 										AND u.deleted=0");
 										
-			$stmt->bindValue(':email', $email);
+			$stmt->bindValue(':email', $this->email);
 			$stmt->execute();
 			$result = $stmt->fetch();
 			

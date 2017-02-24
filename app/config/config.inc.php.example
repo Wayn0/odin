@@ -47,18 +47,20 @@ define('DB_PASS','%DBPASS%');       // Password
 define('DB_NAME','%DBNAME%');       // Database name
 
 // Memcached
-define('USE_MEMCACHED',  %USE_MEMCACHED%);
-define('MEMCACHED_HOST', %MEMCACHED_HOST%);
-define('MEMCACHED_PORT', %MEMCACHED_PORT%);
+define('USE_MEMCACHED',  '%USE_MEMCACHED%');
+define('MEMCACHED_HOST', '%MEMCACHED_HOST%');
+define('MEMCACHED_PORT', '%MEMCACHED_PORT%');
 
 // Password Complexity
-define('MIN_PASSWORD_LENGTH',%PASSWORDLENGTH%);
+define('MIN_PASSWORD_LENGTH','%PASSWORDLENGTH%');
 define('MIXED_CASE',1);
 define('ALPHA_NUM',1);
 
 // Session no activity timeout in mins
 define('SESSION_TIMEOUT',60);
 define('BASE32_SECRET','');
+define('JWT_SECRET','');
+
 
 //oauth2 Authentication
 define('GOOGLE_CLIENT_ID','');

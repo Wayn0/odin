@@ -49,7 +49,7 @@
  * 
  */
   
-$user = new User($params); 
+
 header('Content-type: application/json');
 
 if (isset($_POST['email'])) {
@@ -60,51 +60,66 @@ if (isset($_POST['email'])) {
 	if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
 		// Valid email being checking
 		$log->logDebug("LOGIN JSON: attempt: $username");
-		if($user->verifyPassword($username, $password)) {
-			$log->logInfo("LOGIN JSON: success: $username");
-			$user->setLastLogin();
+		
+		// Check if user exists
+		if(User::verifyEmail($params, $username)) {
 			
-			$tokenId    = base64_encode(random_bytes(32));
-			$issuedAt   = time();
-			$serverName = BASE_URL;			
-			
-			/*
-			 * Create the token as an array
-			 */
-			$data = [
-				'iat'  => $issuedAt,         // Issued at: time when the token was generated
-				'jti'  => $tokenId,          // Json Token Id: an unique identifier for the token
-				'iss'  => $serverName,       // Issuer
-				'nbf'  => $issuedAt,         // Not before
-				'exp'  => $issuedAt + (60 * SESSION_TIMEOUT), // Expire in predefined mins
-				'data' => [                  // returned data
-					'user_id'       => $user->__get('id'),
-					'created_date'  => $user->__get('created_date'),
-				]
-			];			
-			
-			
-			$secret = base64_decode(JWT_SECRET);
-					
-					
-			$jwt = \Firebase\JWT\JWT::encode(
-				$data,   //Data to be encoded in the JWT
-				$secret, // The signing key
-				'HS512'  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
-				);
+			$user = new User($params,null,'',$username); 
+			if($user->verifyPassword($password)) {
+				$log->logInfo("LOGIN JSON: success: $username");
+				$user->setLastLogin();
 				
-			$unencodedArray =  ['jwt' => $jwt,
-								'tag' => "login",
-								'success' => 1,
-								'error' => 0,
-								'first_name' => $user->__get('first_name'),
-								'last_name' => $user->__get('last_name')
-								];
-			echo json_encode($unencodedArray);
-			header("HTTP/1.1 200 Ok"); 
+				$tokenId    = base64_encode(random_bytes(32));
+				$issuedAt   = time();
+				$serverName = BASE_URL;			
 				
+				/*
+				 * Create the token as an array
+				 */
+				$data = [
+					'iat'  => $issuedAt,         // Issued at: time when the token was generated
+					'jti'  => $tokenId,          // Json Token Id: an unique identifier for the token
+					'iss'  => $serverName,       // Issuer
+					'nbf'  => $issuedAt,         // Not before
+					'exp'  => $issuedAt + (60 * SESSION_TIMEOUT), // Expire in predefined mins
+					'data' => [                  // returned data
+						'user_id'       => $user->__get('id'),
+						'created_date'  => $user->__get('created_date'),
+					]
+				];			
+				
+				
+				$secret = base64_decode(JWT_SECRET);
+						
+						
+				$jwt = \Firebase\JWT\JWT::encode(
+					$data,   //Data to be encoded in the JWT
+					$secret, // The signing key
+					'HS512'  // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+					);
+					
+				$unencodedArray =  ['jwt' => $jwt,
+									'tag' => "login",
+									'success' => 1,
+									'error' => 0,
+									'first_name' => $user->__get('first_name'),
+									'last_name' => $user->__get('last_name')
+									];
+				echo json_encode($unencodedArray);
+				header("HTTP/1.1 200 Ok"); 
+			
+			} else {
+				$log->logError("LOGIN: Bad username or password");
+				$json_data['tag'] = "login";
+				$json_data['success'] = 0;
+				$json_data['error'] = 3;
+				$json_data['error_msg'] = "Bad username or password!";
+				echo json_encode($json_data);
+				header("HTTP/1.1 401 Unauthorized"); 			
+			}
+					
 		} else {
-			$log->logError("LOGIN: Bad username or password");
+			$log->logError("LOGIN: Unkown user " . $email);
 			$json_data['tag'] = "login";
 			$json_data['success'] = 0;
 			$json_data['error'] = 3;
