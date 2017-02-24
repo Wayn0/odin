@@ -98,7 +98,7 @@ if (isset($_POST['email'])) {
 								'success' => 1,
 								'error' => 0,
 								'first_name' => $user->__get('first_name'),
-								'first_name' => $user->__get('lasst_name')
+								'last_name' => $user->__get('last_name')
 								];
 			echo json_encode($unencodedArray);
 			header("HTTP/1.1 200 Ok"); 
