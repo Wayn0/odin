@@ -27,8 +27,7 @@ class User
 	protected $log = null;
 	
 	/**
-	 * The user's id 		if (!$uid = User::verify_user($email))
-			$uid = User::create(1,$email,3,$first_name,$last_name);
+	 * The user's id
 	 * @var int
 	 */  
 	protected $id = null;
@@ -460,7 +459,7 @@ class User
 			$result = $stmt->fetch();
 			
 			if ($result['hash'] == Util::getHash($password,$result['salt'])) {
-				$this->setLastLogin();
+				$this->setLoggedIn();
 				return true;
 			}
 		} catch (Exception $e) {
@@ -585,7 +584,7 @@ Thank you";
 	 * @return bool Succesfully set or not
 	 * 
 	 **/
-	function setLastLogin()
+	public function setLastLogin()
 	{
 		// Not a valid user
 		if ($this->id == null)
@@ -623,6 +622,7 @@ Thank you";
 
 		try {
 			$this->getDetailsByEmail();
+			$this->setLastLogin();
 			return true;
 		} catch (Exception $e) {
 			$_SESSION[APP_NAME]['AUTHENTICATED'] = FALSE;
@@ -639,7 +639,7 @@ Thank you";
 	 * @return bool Succesfully set or not
 	 * 
 	 **/
-	function logout()
+	public function logout()
 	{
 		if(isset($_SESSION[APP_NAME]['AUTHENTICATED'])) {
 			$_SESSION[APP_NAME]['AUTHENTICATED'] = false;
