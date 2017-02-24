@@ -25,12 +25,22 @@
  * @apiError InvalidRequest  Invalid Parameters
  * @apiErrorExample {json} InvalidRequest:
  * 	HTTP/1.1 400 Bad Request
- * 	{"tag":"login","success":0,"error":1,"error_msg":"Invalid Request"}
+ * 	{
+ * 		"tag":"registration",
+ * 		"success":0,
+ * 		"error":1,
+ * 		"error_msg":"Invalid Request"
+ * 	}
  *  
  * @apiError InvalidEmail  Malformed email address
  * @apiErrorExample {json} InvalidEmail:
  * 	HTTP/1.1 400 Bad Request
- * 	{"tag":"login","success":0,"error":2,"error_msg":"Invalid Email address"}
+ * 	{
+ * 		"tag":"registration",
+ * 		"success":0,
+ * 		"error":2,
+ * 		"error_msg":"Invalid Email address"
+ * 	}
  * 
  * @apiError BadUsername  Username already in use
  * @apiErrorExample {json} BadUsernamePassword:
@@ -63,7 +73,7 @@ if (isset($_POST['email'])
     $username   = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $first_name = filter_input(INPUT_POST, 'first_name', FILTER_SANITIZE_STRING);
     $last_name  = filter_input(INPUT_POST, 'last_name', FILTER_SANITIZE_STRING);
-    $password   = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+    $password   = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_EMAIL); //Intentional
 	
 	if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
 

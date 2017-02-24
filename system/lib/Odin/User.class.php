@@ -547,9 +547,11 @@ Thank you";
 	public function setPassword($password)
 	{
 		// Not a valid user
-		if ($this->id == null)
-			return false;				
-
+		if ($this->id == null) {
+			$this->log->logError("No user id set.");
+			return false;
+		}
+		
 		$salt = Util::getSalt();
 		$hash = Util::getHash($password, $salt);
 
@@ -563,7 +565,7 @@ Thank you";
 			$stmt->bindValue(':id',   $this->id);
 			
 			if ($stmt->execute()) {
-				$this->log->logDebug("PASSWORD: User:" . $this->email . " changed his/her password");
+				$this->log->logDebug("PASSWORD: Set for user:" . $this->email);
 				return true;
 			} else {
 				return false;
@@ -730,20 +732,19 @@ Thank you";
 
 				// create user_custom entry
 				$stmt2 = $this->db->prepare("INSERT INTO user_custom (user_id) VALUES (:new)");
-				$stmt2->bindValue(':new', $this->db->lastInsertId());
+				$this->id = $this->db->lastInsertId(); // Don't remove. required by setPassword
+				$stmt2->bindValue(':new', $this->id);
 				$stmt2->execute();
 
 				if($this->auth_provider_id == 1) {
-
 					// Only bother with the password if the user
 					if ($this->password == null) {
 						$this->password = Util::getRandomString(MIN_PASSWORD_LENGTH);
 						$this->setPassword($this->password);
-						$this->password = "Supplied at registration";
 					} else {
 						$this->setPassword($this->password);
+						$this->password = "Supplied at registration";
 					}
-					
 				} else if ($auth_provider_id == 2) {
 					$this->password = "Please use the Google login";
 				} else if ($auth_provider_id == 3) {

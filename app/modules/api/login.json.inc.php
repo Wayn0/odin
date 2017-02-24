@@ -25,7 +25,13 @@
  * @apiError InvalidRequest  Invalid Parameters
  * @apiErrorExample {json} InvalidRequest:
  * 	HTTP/1.1 400 Bad Request
- * 	{"tag":"login","success":0,"error":1,"error_msg":"Invalid Request"}
+ * 	{
+ * 		"tag":"login",
+ * 		"success":0,
+ * 		"error":1,
+ * 		"error_msg":
+ * 		"Invalid Request"
+ * 	}
  *  
  * @apiError InvalidEmail  Malformed email address
  * @apiErrorExample {json} InvalidEmail:
