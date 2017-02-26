@@ -27,8 +27,7 @@ class User
 	protected $log = null;
 	
 	/**
-	 * The user's id 		if (!$uid = User::verify_user($email))
-			$uid = User::create(1,$email,3,$first_name,$last_name);
+	 * The user's id
 	 * @var int
 	 */  
 	protected $id = null;
@@ -438,15 +437,14 @@ class User
 
 
 	/**
-	 * Verify email/username and password combination
+	 * Verify user's password 
 	 * 
-	 * @param string $email User's email address
 	 * @param string $password User's password
 	 * 
-	 * @return bool Do the username and password combination match?
+	 * @return bool valid password
 	 * 
 	 **/
-	public function verifyPassword($email, $password)
+	public function verifyPassword($password)
 	{
 		try {
 			$stmt = $this->db->prepare("SELECT u.hash,u.salt
@@ -455,12 +453,12 @@ class User
 										AND u.authentication_provider_id = 1 
 										AND u.deleted=0");
 										
-			$stmt->bindValue(':email', $email);
+			$stmt->bindValue(':email', $this->email);
 			$stmt->execute();
 			$result = $stmt->fetch();
 			
 			if ($result['hash'] == Util::getHash($password,$result['salt'])) {
-				$this->setLastLogin();
+				$this->setLoggedIn();
 				return true;
 			}
 		} catch (Exception $e) {
@@ -549,9 +547,11 @@ Thank you";
 	public function setPassword($password)
 	{
 		// Not a valid user
-		if ($this->id == null)
-			return false;				
-
+		if ($this->id == null) {
+			$this->log->logError("No user id set.");
+			return false;
+		}
+		
 		$salt = Util::getSalt();
 		$hash = Util::getHash($password, $salt);
 
@@ -565,7 +565,7 @@ Thank you";
 			$stmt->bindValue(':id',   $this->id);
 			
 			if ($stmt->execute()) {
-				$this->log->logDebug("PASSWORD: User:" . $this->email . " changed his/her password");
+				$this->log->logDebug("PASSWORD: Set for user:" . $this->email);
 				return true;
 			} else {
 				return false;
@@ -585,7 +585,7 @@ Thank you";
 	 * @return bool Succesfully set or not
 	 * 
 	 **/
-	function setLastLogin()
+	public function setLastLogin()
 	{
 		// Not a valid user
 		if ($this->id == null)
@@ -623,6 +623,7 @@ Thank you";
 
 		try {
 			$this->getDetailsByEmail();
+			$this->setLastLogin();
 			return true;
 		} catch (Exception $e) {
 			$_SESSION[APP_NAME]['AUTHENTICATED'] = FALSE;
@@ -639,7 +640,7 @@ Thank you";
 	 * @return bool Succesfully set or not
 	 * 
 	 **/
-	function logout()
+	public function logout()
 	{
 		if(isset($_SESSION[APP_NAME]['AUTHENTICATED'])) {
 			$_SESSION[APP_NAME]['AUTHENTICATED'] = false;
@@ -731,20 +732,19 @@ Thank you";
 
 				// create user_custom entry
 				$stmt2 = $this->db->prepare("INSERT INTO user_custom (user_id) VALUES (:new)");
-				$stmt2->bindValue(':new', $this->db->lastInsertId());
+				$this->id = $this->db->lastInsertId(); // Don't remove. required by setPassword
+				$stmt2->bindValue(':new', $this->id);
 				$stmt2->execute();
 
 				if($this->auth_provider_id == 1) {
-
 					// Only bother with the password if the user
 					if ($this->password == null) {
 						$this->password = Util::getRandomString(MIN_PASSWORD_LENGTH);
 						$this->setPassword($this->password);
-						$this->password = "Supplied at registration";
 					} else {
 						$this->setPassword($this->password);
+						$this->password = "Supplied at registration";
 					}
-					
 				} else if ($auth_provider_id == 2) {
 					$this->password = "Please use the Google login";
 				} else if ($auth_provider_id == 3) {
