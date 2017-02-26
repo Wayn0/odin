@@ -197,7 +197,25 @@ class Util
 			return false;
 		}
 	}
-	
+
+	/*
+	 * Respond with JSON
+	 *
+	 * @param int $length Length of string to generate
+	 * @param bool $special	Include special charachters in string
+	 *
+	 * @return string
+	 */
+	public static function errorResponseJSON($tag,$message,$http_response) {
+
+		$json_data['tag'] = $tag;
+		$json_data['success'] = false;
+		$json_data['error'] = 1;
+		$json_data['error_msg'] = $message;
+		echo json_encode($json_data);
+		header("HTTP/1.1 " . $http_response);
+	}
+
 	/**
 	 * Convert a byte size to a human readable form 
 	 *
