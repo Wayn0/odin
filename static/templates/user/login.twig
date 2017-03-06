@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+fav    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="Wayne Oliver">
 	<link rel="apple-touch-icon" sizes="57x57" href="{{ico_url}}apple-icon-57x57.png">
@@ -23,29 +23,39 @@
 	<meta name="msapplication-TileImage" content="{{ico_url}}ms-icon-144x144.png">
 	<meta name="theme-color" content="#ffffff">
 	<link rel="icon" href="{{ico_url}}favicon.ico">
-
-    <title>{{title}}</title>
+	
+    <title>Odin Login</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
+
     <!-- Custom styles for this template -->
-    <link href="{{css_url}}grid.css" rel="stylesheet">
+    <link href="{{css_url}}signin.css" rel="stylesheet">
   </head>
 
   <body>
-    <div class="container">
 
-      <h1>{{ error_code }}</h1>
-      <p class="lead">{{ error_message }}</p>
-      <p><a class="btn btn-purple" href="{{ base_url }}"><i class="fa fa-angle-left"></i> Back to Dashboard</a></p>
+    <div class="container">
+	
+      <form class="form-signin" method="post">
+
+		<p>{{ feedback|default("&nbsp;")|raw}}</p>
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input name="emaill" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        <button name="password" class="btn btn-tickit btn-block" type="submit">Sign in</button>
+      </form>
 
     </div> <!-- /container -->
+
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="{{js_url}}ie10-viewport-bug-workaround.js"></script>
+    <script src="{{js_url}}/ie10-viewport-bug-workaround.js"></script>
   </body>
 </html>

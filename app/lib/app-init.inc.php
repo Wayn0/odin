@@ -11,3 +11,18 @@
  * @license     http://www.opensource.org/licenses/BSD-2-Clause
  *
  **/
+
+// Create the user object
+$session_user = new User($params);
+
+// check if the user is logged in and load all the bits and pieces
+if(isset($_SESSION[APP_NAME]['EMAIL'])) {
+
+	// Verify session
+	$session_username = $_SESSION[APP_NAME]['EMAIL'];
+	$session_authenticated = $session_user->isLoggedIn($session_username);
+  
+} else {
+	$session_username      = null;
+	$session_authenticated = false;
+}

@@ -618,7 +618,7 @@ Thank you";
 	 **/
 	public function setLoggedIn()
 	{
-		$_SESSION[APP_NAME]['AUTHENTICATED'] = TRUE;
+		$_SESSION[APP_NAME]['AUTHENTICATED'] = true;
 		$_SESSION[APP_NAME]['EMAIL'] = $this->email;
 
 		try {
@@ -626,7 +626,7 @@ Thank you";
 			$this->setLastLogin();
 			return true;
 		} catch (Exception $e) {
-			$_SESSION[APP_NAME]['AUTHENTICATED'] = FALSE;
+			$_SESSION[APP_NAME]['AUTHENTICATED'] = false;
 			$this->log->logError($e);;
 			return false;
 		}
@@ -662,7 +662,7 @@ Thank you";
 	function isLoggedIn()
 	{
 		if(isset($_SESSION[APP_NAME]['AUTHENTICATED']) 
-			&& $_SESSION[APP_NAME]['AUTHENTICATED'] == TRUE 
+			&& $_SESSION[APP_NAME]['AUTHENTICATED'] == true 
 			&& $_SESSION[APP_NAME]['EMAIL'] == $this->email) {
 
 			$this->setLoggedIn();
