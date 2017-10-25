@@ -18,7 +18,7 @@ $template_vars['feedback'] = '';
 if (isset($_POST['email'])) {
 	// Get form contents
 	$username = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-	$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_EMAIL);
+	$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
 
 	$session_user->__set('email',$username);
 	// Check username and password

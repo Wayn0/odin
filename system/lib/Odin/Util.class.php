@@ -178,11 +178,11 @@ class Util
 	 *
 	 * @return bool
 	 **/ 	
-	public static function sendTextMail($text,$subject)
+	public static function sendTextMail($text,$subject,$email)
 	{			
-		$mail = new PHPMailer;
+		$mail = new \PHPMailer;
 		$mail->isSendmail();
-		$mail->setFrom($from, APP_NAME);
+		$mail->setFrom(EMAIL_FROM, APP_NAME);
 		$mail->addAddress($email); 
 		$mail->isHTML(false); 
 		$mail->Subject = $subject;
