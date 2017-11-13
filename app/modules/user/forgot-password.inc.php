@@ -36,7 +36,6 @@ if (isset($_POST['email'])) {
 						</div>';
 		} else {
 			$log->logError("PASSWORD RESET ERROR: $email");
-			print_r($user);
 			$template_vars['feedback'] = '
 						<div class="alert alert-danger alert-dismissable">
 							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
