@@ -13,6 +13,8 @@ If it helps you to... enjoy :)
 * php > 7.0 
 * php PDO
 
+See the wiki for configuration options.
+
 ### Thanks
 
 * @davidtmiller for [startbootstrap-sb-admin-2](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2)

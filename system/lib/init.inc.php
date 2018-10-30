@@ -61,33 +61,34 @@ $_SESSION[APP_NAME]['LAST_ACTIVITY'] = time();
 if (DB_REQUIRED == true) {
 	// Attempt to connect to the defined data
 	try {
-	switch (DB_TYPE) {
-		case 'mysql':
-			$mysql_dsn = 'mysql:dbname=' . DB_NAME .';host=' . DB_HOST . ';port=' . DB_PORT;
-			$db = new PDO($mysql_dsn, DB_USER, DB_PASS);
-			break;
+		switch (DB_TYPE) {
+			case 'mysql':
+				$mysql_dsn = 'mysql:dbname=' . DB_NAME .';host=' . DB_HOST . ';port=' . DB_PORT;
+				$db = new PDO($mysql_dsn, DB_USER, DB_PASS);
+				break;
 
-		case 'sqlite':
-			$sqlite_dsn = 'sqlite:' . LOG_DIR . DS . DB_NAME . '.sqlite' ;
-			$db = new PDO($sqlite_dsn);
-			break;
+			case 'sqlite':
+				$sqlite_dsn = 'sqlite:' . LOG_DIR . DS . DB_NAME . '.sqlite' ;
+				$db = new PDO($sqlite_dsn);
+				break;
 
-		case 'pgsql':
-			$pgsql_dsn = 'pgsql:host='.DB_HOST.';dbname='.DB_NAME.';user='.DB_USER.';password='.DB_PASS.';';
-			$db = new PDO($pgsql_dsn );
-			break;
+			case 'pgsql':
+				$pgsql_dsn = 'pgsql:host='.DB_HOST.';dbname='.DB_NAME.';user='.DB_USER.';password='.DB_PASS.';';
+				$db = new PDO($pgsql_dsn );
+				break;
 
-		default:
-			throw new Exception("Invalid database type: " . DB_TYPE);
+			default:
+				throw new Exception("Invalid database type: " . DB_TYPE);
 		}
 
 		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	}
 
-	catch (PDOException $e) {
+	} catch (PDOException $e) {
 		$log->logFatal("Database connection error: check config.inc.php and that database is configured and running");
 		die('<strong>Could not connect to the database: </strong><p>Please check that your configured database server is running...</p>');
 	}
+} else {
+	$db = null;
 }
 
 //Parameters for passing to custom classes
@@ -119,8 +120,11 @@ $template_vars = array(
 );
 
 // Make request headers available to modules
-$request_headers = apache_request_headers();
-
+if(function_exists('apache_request_headers')) {
+       $request_headers = apache_request_headers();
+} else {
+       $request_headers = array();
+}
 
 // Begin Routing section
 // Expand the url into an array for easy manipulation
