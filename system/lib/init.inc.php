@@ -127,9 +127,14 @@ if(function_exists('apache_request_headers')) {
 }
 
 // Begin Routing section
-// Expand the url into an array for easy manipulation
-$url_array = array();
-$url_array = explode("/",$url);
+if (substr($url, 0, 1) === "/") {
+	$url = ltrim($url, "/")
+;}
+
+if (strpos($url, "/") !== false)
+	$url_array = explode("/",$url);
+else
+	$url_array = array(0 => '');
 
 // Split the various parts of the url into there module/action/get-variables
 $module = $url_array[0];
