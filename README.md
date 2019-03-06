@@ -17,13 +17,25 @@ See the wiki for configuration options.
 
 ### Quick Setup
 
+#### DB
+
 ``
 CREATE DATABASE meh
 CREATE USER 'foo'@'localhost' IDENTIFIED BY 'barr';
 GRANT ALL PRIVILEGES ON foo.* TO 'meh'@'localhost';
 ``
 
-``cp app/config/config.inc.php.example app/config/config.inc.php
+
+#### Redhat / Centos
+
+``
+git clone https://github.com/Wayn0/odin.git
+cd odin
+mkdir vendor
+mkdir logs
+echo '{}' > composer.lock
+chown apache vendor logs composer.lock
+cp app/config/config.inc.php.example app/config/config.inc.php
 $EDITOR app/config/config.inc.php
 ``
 
