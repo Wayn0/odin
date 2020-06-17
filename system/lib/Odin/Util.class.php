@@ -151,7 +151,7 @@ class Util
 			$html_message = str_replace('{{' . strtoupper($key) . '}}', $val, $html_message);
 		}
 		
-		$mail = new \PHPMailer;
+		$mail = new PHPMailer\PHPMailer\PHPMailer;
 		$mail->isSendmail();
 		$mail->addAddress($to);
 		$mail->setFrom($from, APP_NAME);
@@ -171,7 +171,7 @@ class Util
 	}
 	
 	/**
-	 * Send an email using an html template 
+	 * Send an email using plain text
 	 *
 	 * @param string $template Name of the *twig* template
 	 * @param string $subject Subject line for email
@@ -180,7 +180,7 @@ class Util
 	 **/ 	
 	public static function sendTextMail($text,$subject,$email)
 	{			
-		$mail = new \PHPMailer;
+		$mail = new PHPMailer\PHPMailer\PHPMailer;
 		$mail->isSendmail();
 		$mail->setFrom(EMAIL_FROM, APP_NAME);
 		$mail->addAddress($email); 
