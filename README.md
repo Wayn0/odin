@@ -19,16 +19,28 @@ See the wiki for configuration options.
 
 #### DB
 
-``
+```
 CREATE DATABASE meh
 CREATE USER 'foo'@'localhost' IDENTIFIED BY 'barr';
 GRANT ALL PRIVILEGES ON foo.* TO 'meh'@'localhost';
-``
+```
 
+#### Debian / Ubuntu
+
+```
+git clone https://github.com/Wayn0/odin.git
+cd odin
+mkdir vendor
+mkdir logs
+echo '{}' > composer.lock
+chown www-data vendor logs composer.lock
+cp app/config/config.inc.php.example app/config/config.inc.php
+$EDITOR app/config/config.inc.php
+```
 
 #### Redhat / Centos
 
-``
+```
 git clone https://github.com/Wayn0/odin.git
 cd odin
 mkdir vendor
@@ -37,7 +49,7 @@ echo '{}' > composer.lock
 chown apache vendor logs composer.lock
 cp app/config/config.inc.php.example app/config/config.inc.php
 $EDITOR app/config/config.inc.php
-``
+```
 
 ### Thanks
 
