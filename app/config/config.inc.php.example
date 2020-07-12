@@ -12,13 +12,8 @@
  **/
 
 // Application Name
-define('APP_NAME','%APPNAME%');
-define('CUSTOMER_NAME','%APPNAME%');
-define('EMAIL_FROM','%EMAIL_FROM%');
-
-// Default Routing
-define('DEFAULT_MODULE', 'welcome');
-define('DEFAULT_ACTION', 'index');
+define('APP_NAME','{{APP_NAME}}');
+define('EMAIL_FROM','{{EMAIL_FROM}}');
 
 // Environment type
 define('DEVELOPMENT_ENVIRONMENT', true);
@@ -38,28 +33,32 @@ date_default_timezone_set('Africa/Johannesburg');
 define('LOG_LEVEL', 6); 			
 
 // Database Credentials
-define('DB_REQUIRED',true);         // DB connection required?
-define('DB_TYPE','%DBTYPE%');       // DB PDO type: mysql / sqlite / pgsql
-define('DB_HOST','%DBHOST%');       // hostname / ip of DB server
-define('DB_PORT','%DBPORT%');       // Database server port		
-define('DB_USER','%DBUSER%');       // Username
-define('DB_PASS','%DBPASS%');       // Password
-define('DB_NAME','%DBNAME%');       // Database name
+define('DB_REQUIRED',{{DB_REQUIRED ? 1 : 0}});         // DB connection required?
+define('DB_TYPE','{{DBTYPE}}');       // DB PDO type: mysql / sqlite / pgsql
+define('DB_HOST','{{BHOST}}');       // hostname / ip of DB server
+define('DB_PORT','{{DBPORT}}');       // Database server port		
+define('DB_USER','{{DBUSER}}');       // Username
+define('DB_PASS','{{DBPASS}}');       // Password
+define('DB_NAME','{{DBNAME}}');       // Database name
 
 // Memcached
-define('USE_MEMCACHED',  '%USE_MEMCACHED%');
-define('MEMCACHED_HOST', '%MEMCACHED_HOST%');
-define('MEMCACHED_PORT', '%MEMCACHED_PORT%');
+define('USE_MEMCACHED',  {{USE_MEMCACHED ? 1 : 0}});
+define('MEMCACHED_HOST', '{{MEMCACHED_HOST}}');
+define('MEMCACHED_PORT', '{{MEMCACHED_PORT}}');
+
+// Redis
+define('USE_REDIS',  {{USE_REDIS ? 1 : 0}});
+define('REDIS_HOST', '{{REDIS_HOST}}');
+define('REDIS_PORT', '{{REDIS_PORT}}');
 
 // Password Complexity
-define('MIN_PASSWORD_LENGTH','%PASSWORDLENGTH%');
-define('MIXED_CASE',1);
-define('ALPHA_NUM',1);
+define('MIN_PASSWORD_LENGTH',{{MIN_PASSWORD_LENGTH}});
 
 // Session no activity timeout in mins
-define('SESSION_TIMEOUT',60);
-define('BASE32_SECRET','');
-define('JWT_SECRET','');
+define('SESSION_TIMEOUT',{{SESSION_TIMEOUT}});
+define('OTP_SECRET','{{OTP_SECRET}}');
+define('OTP_BASE32_SECRET','{{OTP_BASE32_SECRET}}');
+define('JWT_SECRET',{{JWT_SECRET}});
 
 
 //oauth2 Authentication

@@ -73,7 +73,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `deleted`, `created_date`, `created_by_id`, `authentication_provider_id`, `email`, `salt`, `hash`, `first_name`, `last_name`, `slug`, `last_login`, `change_password`) VALUES
-(1, 0, '2017-02-20 17:41:15', 1, 1, 'info@wayneoliver.co.za', '', '', 'Wayne', 'Oliver', 'wayne-oliver', NULL, 0);
+(1, 1, now(), 1, 1, 'SYSTEM@LOCAL', '', '', 'LOCAL', 'SYSTEM', 'system', NULL, 0),(2, 0, now(), 1, 1, 'info@wayneoliver.co.za', '', '', 'Wayne', 'Oliver', 'wayne-oliver', NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -91,7 +91,7 @@ CREATE TABLE `user_custom` (
 --
 
 INSERT INTO `user_custom` (`user_id`, `photo_url`) VALUES
-(1, 'static/img/avatar-generic.png');
+(1, 'static/img/avatar-generic.png'),(2, 'static/img/avatar-generic.png');
 
 -- --------------------------------------------------------
 
@@ -134,7 +134,7 @@ CREATE TABLE `user_role_membership` (
 --
 
 INSERT INTO `user_role_membership` (`id`, `deleted`, `created_date`, `created_by_id`, `user_id`, `role_id`) VALUES
-(1, 0, '2017-02-17 09:10:13', 1, 1, 1);
+(1, 0, '2017-02-17 09:10:13', 1, 1, 1),(2, 0, '2017-02-17 09:10:13', 1, 2, 1);
 
 --
 -- Indexes for dumped tables

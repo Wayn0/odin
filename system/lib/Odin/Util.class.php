@@ -4,7 +4,7 @@
  * 
  * @package     Odin Framework
  * @author      Wayne Oliver <wayne@open-is.co.za>
- * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2017
+ * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2020
  * @license     http://www.opensource.org/licenses/BSD-2-Clause
  *
  **/
@@ -13,19 +13,6 @@ namespace Odin;
  
 class Util 
 {
-	/**
-	 * A database connection tha is responsible for all data 
-	 * persistence and retrieval.
-	 * @var PDO
-	 */  
-	public static $db = null;
-	
-	/**
-	 * The logger that handles writing logs to file.
-	 * @var Log
-	 */  
-	public static $log = null;	
-	
 	/*
 	 * Create a URL safe slug from a string of text
 	 *
@@ -65,7 +52,7 @@ class Util
 	 * 
 	 * @return string 
 	 */
-	public static function getRandomString($length=8,$special=TRUE) {
+	public static function getRandomString($length=8, $special=true) {
 		// Characters to include in the returned string 
 		$string = "abcdefghijklmnopqrstuvwxyz";
 		$string = $string . 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -223,9 +210,9 @@ class Util
 	 *
 	 * @return string $bytes
 	 **/ 		
-	public static function bytes_size($size)
+	public static function bytesSize($size)
 	{
 		$unit = array('b','kb','mb','gb','tb','pb');
 		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
-	}	
+	}
 }

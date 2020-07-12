@@ -4,7 +4,7 @@
  * 
  * @package     Odin Framework
  * @author      Wayne Oliver <wayne@open-is.co.za>
- * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2017
+ * @copyright   Wayne Oliver <wayne@open-is.co.za> 2011 - 2020
  * @license     http://www.opensource.org/licenses/BSD-2-Clause
  *
  **/
