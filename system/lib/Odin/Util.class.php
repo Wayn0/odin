@@ -215,4 +215,18 @@ class Util
 		$unit = array('b','kb','mb','gb','tb','pb');
 		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
 	}
+
+	/**
+	 * Check if a string startsWith (from JS) a string
+	 *
+	 * @param string $haystack the string we intended searching
+	 * @param string $needle - what we are looking for
+	 *
+	 * @return boolean
+	 */
+	public static function startsWith($haystack,$needle)
+	{
+		$len = strlen($needle);
+		return (substr($haystack, 0, $len) === $needle);
+	}
 }
